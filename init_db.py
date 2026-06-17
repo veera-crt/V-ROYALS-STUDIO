@@ -108,7 +108,21 @@ def init_db():
                 ('Face Attendance Pro', 'Facial recognition attendance system with PDF reports.', 1299, 899, '/assets/images/store/attendance.png', 'python,opencv,user,database,pdf', 'project', 'https://github.com/veera-crt/V-ROYALS-STUDIO', True, 'https://github.com/veera-crt/V-ROYALS-STUDIO/blob/main/README.md')
             ]
             for item in store_items:
-                cur.execute("INSERT INTO store_products (title, description, price, sale_price, thumbnail_url, tech_stack, category, source_code_link, is_public, guide_link) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (title) DO NOTHING", item)
+                cur.execute("""
+                    INSERT INTO store_products
+                        (title, description, price, sale_price, thumbnail_url, tech_stack, category, source_code_link, is_public, guide_link)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (title) DO UPDATE SET
+                        description      = EXCLUDED.description,
+                        price            = EXCLUDED.price,
+                        sale_price       = EXCLUDED.sale_price,
+                        thumbnail_url    = EXCLUDED.thumbnail_url,
+                        tech_stack       = EXCLUDED.tech_stack,
+                        category         = EXCLUDED.category,
+                        source_code_link = EXCLUDED.source_code_link,
+                        is_public        = EXCLUDED.is_public,
+                        guide_link       = EXCLUDED.guide_link
+                """, item)
 
             # No static reviews seeded to ensure only real client reviews are displayed.
             
