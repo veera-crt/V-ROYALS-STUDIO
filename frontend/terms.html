@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service — V Royals Studio</title>
+  <link rel="icon" type="image/png" href="assets/images/favicon.png" />
+
+  <link rel="stylesheet" href="css/vroyals_theme.css">
+  <script>
+    (function() {
+      try {
+        const u = sessionStorage.getItem('vroyals_user');
+        if (u && JSON.parse(u).logged_in) {
+          document.documentElement.classList.add('user-logged-in');
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+    .legal-content { max-width: 800px; margin: 140px auto 100px; padding: 0 5%; line-height: 1.8; }
+    h1 { margin-bottom: 2rem; color: var(--accent); }
+    h2 { margin-top: 3rem; margin-bottom: 1rem; font-family: 'Syne'; }
+    p { margin-bottom: 1.5rem; color: var(--muted); }
+    ul { margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--muted); }
+    li { margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body>
+<nav id="main-nav">
+  <a href="index.html" class="logo">V<em> Royals</em> Studio</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li>
+    <li><a href="youtube.html">YouTube</a></li>
+    <li><a href="projects.html">Store</a></li><li><a href="about.html">About</a></li>
+    <li class="nav-logged-out"><a href="login.html">Login</a></li>
+    <li class="nav-logged-in"><a href="my-reels.html" style="color:var(--accent); font-weight:600">Your Items</a></li>
+    <li class="nav-logged-in nav-profile">
+      <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); padding:0.4rem 0.8rem; border-radius:30px; border:1px solid var(--border); margin-left:0.5rem">
+        <span class="user-avatar-placeholder">👤</span>
+        <span class="user-name-placeholder" style="font-size:0.8rem; font-weight:600">User</span>
+        <a href="/api/logout" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" title="Logout" style="display:flex; align-items:center; margin-left:0.4rem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted); transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </a>
+      </div>
+    </li>
+    <li><a href="contact.html" class="btn btn-primary btn-sm">Hire Me</a></li>
+  </ul>
+</nav>
+<script>
+  (function() {
+    try {
+      const u = sessionStorage.getItem('vroyals_user');
+      if (u) {
+        const user = JSON.parse(u);
+        if (user.logged_in) {
+          const firstName = (user.full_name || 'User').split(' ')[0];
+          document.querySelectorAll('.user-name-placeholder').forEach(el => {
+            el.textContent = firstName;
+          });
+          document.querySelectorAll('.user-avatar-placeholder').forEach(el => {
+            if (user.avatar) {
+              el.innerHTML = `<img src="${user.avatar}" style="width:20px; height:20px; border-radius:50%; display:block">`;
+            }
+          });
+        }
+      }
+    } catch(e) {}
+  })();
+</script>
+
+<div class="legal-content reveal">
+  <div class="section-label">Legal</div>
+  <h1>Terms of Service</h1>
+  <p>Last updated: April 26, 2026</p>
+
+  <h2>1. License for Digital Products</h2>
+  <p>When you purchase or are granted access to a project, template, or source code, you are granted a non-exclusive, non-transferable license to use that asset for your personal or commercial projects. You may not resell the raw source code or assets.</p>
+
+  <h2>2. User Accounts</h2>
+  <p>You are responsible for maintaining the confidentiality of your account and password. You must provide accurate and complete information during registration.</p>
+
+  <h2>3. Prohibited Conduct</h2>
+  <p>Users may not attempt to bypass access controls, share drive links with unauthorized parties, or use our digital assets in a way that violates international copyright laws.</p>
+
+  <h2>4. Refunds</h2>
+  <p>Due to the nature of digital goods (source code and developer assets), all sales are final once access is granted. If you experience technical issues, please contact our support team.</p>
+
+  <h2>5. Limitation of Liability</h2>
+  <p>V Royals Studio is not liable for any direct or indirect damages arising from the use of our digital products or services.</p>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-bottom"><p>© 2025 V Royals Studio. <a href="terms.html">Terms</a> · <a href="privacy-policy.html">Privacy</a></p></div>
+</footer>
+<script src="js/shared.js"></script>
+</body>
+</html>

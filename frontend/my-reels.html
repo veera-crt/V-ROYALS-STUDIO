@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Shared Projects — V Royals Studio</title>
+  <link rel="icon" type="image/png" href="assets/images/favicon.png" />
+
+  <link rel="stylesheet" href="css/vroyals_theme.css">
+  <script>
+    (function() {
+      try {
+        const u = sessionStorage.getItem('vroyals_user');
+        if (u && JSON.parse(u).logged_in) {
+          document.documentElement.classList.add('user-logged-in');
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+    .reels-hero { padding: 140px 5% 40px; }
+    .reels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
+    .reel-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; transition: var(--transition); }
+    .reel-card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: var(--shadow-glow); }
+    .drive-icon { font-size: 2rem; color: #34a853; }
+    .no-reels { text-align: center; padding: 100px 0; color: var(--muted); }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    
+    /* Review Form Styling */
+    .review-toggle { background: none; border: none; color: var(--accent); font-size: 0.8rem; font-weight: 600; cursor: pointer; padding: 0; margin-top: 0.5rem; text-decoration: underline; }
+    .review-form-box { display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .review-form-box.active { display: block; }
+    .star-rating { display: flex; gap: 0.25rem; margin-bottom: 0.75rem; }
+    .star-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--muted); padding: 0; }
+    .star-btn.active { color: #f5c518; }
+    .rev-textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.6rem; color: var(--text); font-size: 0.85rem; resize: none; min-height: 60px; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body>
+<nav id="main-nav">
+  <a href="index.html" class="logo">V<em> Royals</em> Studio</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="services.html">Services</a></li>
+    <li><a href="youtube.html">YouTube</a></li>
+    <li><a href="projects.html">Store</a></li>
+    <li><a href="about.html">About</a></li>
+    <li class="nav-logged-out"><a href="login.html">Login</a></li>
+    <li class="nav-logged-in"><a href="my-reels.html" style="color:var(--accent); font-weight:600">Your Items</a></li>
+    <li class="nav-logged-in nav-profile">
+      <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); padding:0.4rem 0.8rem; border-radius:30px; border:1px solid var(--border); margin-left:0.5rem">
+        <span class="user-avatar-placeholder">👤</span>
+        <span class="user-name-placeholder" style="font-size:0.8rem; font-weight:600">User</span>
+        <a href="/api/logout" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" title="Logout" style="display:flex; align-items:center; margin-left:0.4rem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted); transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </a>
+      </div>
+    </li>
+    <li><a href="contact.html" class="btn btn-primary btn-sm">Hire Me</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+<script>
+  (function() {
+    try {
+      const u = sessionStorage.getItem('vroyals_user');
+      if (u) {
+        const user = JSON.parse(u);
+        if (user.logged_in) {
+          const firstName = (user.full_name || 'User').split(' ')[0];
+          document.querySelectorAll('.user-name-placeholder').forEach(el => {
+            el.textContent = firstName;
+          });
+          document.querySelectorAll('.user-avatar-placeholder').forEach(el => {
+            if (user.avatar) {
+              el.innerHTML = `<img src="${user.avatar}" style="width:20px; height:20px; border-radius:50%; display:block">`;
+            }
+          });
+        }
+      }
+    } catch(e) {}
+  })();
+</script>
+<div class="mobile-drawer" id="mobile-drawer">
+  <a href="index.html">Home</a><a href="services.html">Services</a>
+  <a href="youtube.html">YouTube</a><a href="projects.html">Store</a><a href="about.html">About</a>
+  <a href="login.html" class="nav-logged-out">Login</a>
+  <a href="my-reels.html" class="nav-logged-in" style="color:var(--accent); font-weight:600">Your Items</a>
+  <a href="/api/logout" class="nav-logged-in" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" style="color:var(--muted)">Logout 🚪</a>
+  <a href="contact.html" style="color:var(--accent)">Hire Me →</a>
+</div>
+
+<div class="reels-hero">
+  <div class="section-label">Private Access</div>
+  <h1 class="reveal">My Shared<br><em style="font-style:normal;color:var(--accent)">Projects & Security Audits.</em></h1>
+  <p class="section-desc reveal">Exclusive code repositories, pentest audits, and deliverables shared directly with you. High-speed access enabled.</p>
+</div>
+
+<section>
+  <div class="reels-grid" id="reels-grid">
+    <!-- Dynamic Reels -->
+    <div class="no-reels reveal" id="loading-msg">
+      <div style="font-size:3rem; margin-bottom:1rem; animation: bounce 1s infinite">👑</div>
+      <p style="font-family:'Space Mono'; letter-spacing:0.1em; color:var(--accent)">PREPARING YOUR VAULT...</p>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-bottom"><p>© 2025 V Royals Studio. <a href="terms.html">Terms</a> · <a href="privacy-policy.html">Privacy</a></p></div>
+</footer>
+
+<script src="js/shared.js"></script>
+<script>
+  function convertToDirectDownload(url) {
+    if (!url) return url;
+    url = url.trim();
+    
+    // Google Drive File Link direct download converter
+    if (url.includes('drive.google.com')) {
+      const matchD = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if (matchD && matchD[1]) {
+        return `https://drive.google.com/uc?export=download&id=${matchD[1]}`;
+      }
+      const matchQuery = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (matchQuery && matchQuery[1]) {
+        return `https://drive.google.com/uc?export=download&id=${matchQuery[1]}`;
+      }
+    }
+    
+    // GitHub Repository direct zip download converter
+    if (url.includes('github.com')) {
+      let cleanUrl = url.replace(/\/$/, '').replace(/\.git$/, '');
+      const match = cleanUrl.match(/github\.com\/([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+)$/);
+      if (match) {
+        return `${cleanUrl}/archive/refs/heads/main.zip`;
+      }
+    }
+    
+    return url;
+  }
+
+  async function loadMyReels() {
+    const grid = document.getElementById('reels-grid');
+    try {
+      const response = await fetch('/api/user/reels');
+      const reels = await response.json();
+      
+      if (reels && reels.length > 0) {
+        grid.innerHTML = '';
+        reels.forEach(r => {
+          const downloadLink = convertToDirectDownload(r.drive_link);
+          const isGithub = r.drive_link.includes('github.com');
+          const badgeText = isGithub ? 'GITHUB REPO' : 'DRIVE ACCESS';
+          const iconText = isGithub ? '💻' : '📁';
+          
+          const card = document.createElement('div');
+          card.className = 'reel-card reveal';
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center">
+              <div class="drive-icon">${iconText}</div>
+              <span class="badge badge-gold">${badgeText}</span>
+            </div>
+            <h3>${r.title}</h3>
+            <p style="font-size:0.85rem; color:var(--muted)">Assigned on ${new Date(r.created_at).toLocaleDateString()}</p>
+            <div style="display:flex; gap:0.5rem; align-items:center; margin-top:1rem; flex-wrap:wrap;">
+              <a href="${downloadLink}" download target="_blank" class="btn btn-primary btn-sm" style="flex:1; min-width:120px; text-align:center">Download Project</a>
+              ${r.guide_link ? `<a href="${r.guide_link}" target="_blank" class="btn btn-ghost btn-sm" style="flex:1; min-width:100px; text-align:center; border-color:var(--accent2); color:var(--accent2)">📖 Guide</a>` : ''}
+              <button class="btn btn-ghost btn-sm review-trigger" style="min-width:70px" onclick="toggleReviewForm(this)">⭐ Review</button>
+            </div>
+            
+            <div class="review-form-box">
+              <div class="star-rating">
+                <button class="star-btn active" onclick="setRating(this, 1)">★</button>
+                <button class="star-btn active" onclick="setRating(this, 2)">★</button>
+                <button class="star-btn active" onclick="setRating(this, 3)">★</button>
+                <button class="star-btn active" onclick="setRating(this, 4)">★</button>
+                <button class="star-btn active" onclick="setRating(this, 5)">★</button>
+              </div>
+              <textarea class="rev-textarea" placeholder="Tell us what you think about this project..."></textarea>
+              <button class="btn btn-primary btn-sm" style="width:100%" onclick="submitReelReview(this, '${r.title}')">Submit Review</button>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+        setTimeout(() => {
+          grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+        }, 100);
+      } else {
+        grid.innerHTML = '<div class="no-reels reveal"><p>No projects or audits have been shared with your account yet.</p></div>';
+      }
+    } catch (e) {
+      grid.innerHTML = '<div class="no-reels reveal"><p>Failed to load projects. Please try again later.</p></div>';
+    }
+  }
+
+  function toggleReviewForm(btn) {
+    const box = btn.closest('.reel-card').querySelector('.review-form-box');
+    box.classList.toggle('active');
+  }
+
+  function setRating(btn, rating) {
+    const parent = btn.parentElement;
+    const stars = parent.querySelectorAll('.star-btn');
+    stars.forEach((s, idx) => {
+      if (idx < rating) s.classList.add('active');
+      else s.classList.remove('active');
+    });
+    parent.dataset.rating = rating;
+  }
+
+  async function submitReelReview(btn, itemName) {
+    const card = btn.closest('.reel-card');
+    const ratingBox = card.querySelector('.star-rating');
+    const rating = ratingBox.dataset.rating || 5;
+    const comment = card.querySelector('.rev-textarea').value.trim();
+
+    if (!comment) { alert("Please enter a comment!"); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    try {
+      const resp = await fetch('/api/reviews/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item_name: itemName, rating: parseInt(rating), comment: comment })
+      });
+      const res = await resp.json();
+      if (res.success) {
+        card.querySelector('.review-form-box').innerHTML = '<p style="color:#22c55e; font-size:0.85rem; text-align:center">✅ Review submitted!</p>';
+        setTimeout(() => card.querySelector('.review-form-box').classList.remove('active'), 3000);
+      } else {
+        alert("Error: " + res.error);
+        btn.disabled = false;
+        btn.textContent = 'Submit Review';
+      }
+    } catch (e) {
+      alert("Submission failed.");
+      btn.disabled = false;
+      btn.textContent = 'Submit Review';
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', loadMyReels);
+</script>
+</body>
+</html>

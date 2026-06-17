@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel — V Royals Studio</title>
+  <link rel="icon" type="image/png" href="assets/images/favicon.png"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/vroyals_theme.css"/>
+  <script>
+    (function() {
+      try {
+        const u = sessionStorage.getItem('vroyals_user');
+        if (u) {
+          const parsed = JSON.parse(u);
+          if (parsed.logged_in && parsed.is_admin) {
+            document.documentElement.classList.add('user-logged-in');
+          } else {
+            window.location.href = '/login?error=Admin access required';
+          }
+        } else {
+          window.location.href = '/login?error=Admin access required';
+        }
+      } catch(e) {
+        window.location.href = '/login?error=Admin access required';
+      }
+    })();
+  </script>
+  <style>
+    .admin-container {
+      max-width: 1200px;
+      margin: 120px auto 60px;
+      padding: 0 1.5rem;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .admin-nav {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+    .admin-tab {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--muted);
+      padding: 0.6rem 1.2rem;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    .admin-tab:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.03);
+    }
+    .admin-tab.active {
+      color: #000000;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .admin-section {
+      display: none;
+    }
+    .admin-section.active {
+      display: block;
+    }
+    
+    /* Table styles */
+    .table-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+      margin-bottom: 2rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+    th, td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: rgba(255,255,255,0.02);
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    
+    /* Form styles */
+    .admin-form {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .form-group label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: var(--transition);
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px rgba(245,197,24,0.15);
+    }
+    
+    .status-toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-sm);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transform: translateY(150%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .status-toast.visible {
+      transform: translateY(0);
+    }
+    .status-toast.success { border-color: var(--green); }
+    .status-toast.error { border-color: var(--accent2); }
+
+    .action-btn-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .edit-pencil {
+      transition: transform 0.2s, opacity 0.2s, color 0.2s;
+    }
+    .edit-pencil:hover {
+      opacity: 1 !important;
+      color: var(--accent) !important;
+      transform: scale(1.15);
+    }
+  </style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <a href="index.html" class="logo">V<em> Royals</em> Studio</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="services.html">Services</a></li>
+    <li><a href="youtube.html">YouTube</a></li>
+    <li><a href="projects.html">Store</a></li>
+    <li><a href="about.html">About</a></li>
+    <li class="nav-logged-out"><a href="login.html">Login</a></li>
+    <li class="nav-logged-in"><a href="my-reels.html" style="color:var(--accent); font-weight:600">Your Items</a></li>
+    <li class="nav-logged-in nav-profile">
+      <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); padding:0.4rem 0.8rem; border-radius:30px; border:1px solid var(--border); margin-left:0.5rem">
+        <span class="user-avatar-placeholder">👤</span>
+        <span class="user-name-placeholder" style="font-size:0.8rem; font-weight:600">User</span>
+        <a href="/api/logout" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" title="Logout" style="display:flex; align-items:center; margin-left:0.4rem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted); transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </a>
+      </div>
+    </li>
+    <li><a href="contact.html" class="btn btn-primary btn-sm">Hire Me</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+<script>
+  (function() {
+    try {
+      const u = sessionStorage.getItem('vroyals_user');
+      if (u) {
+        const user = JSON.parse(u);
+        if (user.logged_in) {
+          const firstName = (user.full_name || 'User').split(' ')[0];
+          document.querySelectorAll('.user-name-placeholder').forEach(el => {
+            el.textContent = firstName;
+          });
+          document.querySelectorAll('.user-avatar-placeholder').forEach(el => {
+            if (user.avatar) {
+              el.innerHTML = `<img src="${user.avatar}" style="width:20px; height:20px; border-radius:50%; display:block">`;
+            }
+          });
+        }
+      }
+    } catch(e) {}
+  })();
+</script>
+
+<div class="mobile-drawer" id="mobile-drawer">
+  <a href="index.html">Home</a><a href="services.html">Services</a>
+  <a href="youtube.html">YouTube</a><a href="projects.html">Store</a><a href="about.html">About</a>
+  <a href="login.html" class="nav-logged-out">Login</a>
+  <a href="my-reels.html" class="nav-logged-in" style="color:var(--accent); font-weight:600">Your Items</a>
+  <a href="/api/logout" class="nav-logged-in" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" style="color:var(--muted)">Logout 🚪</a>
+  <a href="contact.html" style="color:var(--accent)">Hire Me →</a>
+  <p class="mobile-drawer-footer">V Royals Studio © 2025</p>
+</div>
+
+<div class="admin-container">
+  <div class="admin-header">
+    <div>
+      <div class="section-label">Management console</div>
+      <h2>Control <em style="color:var(--accent2); font-style:normal">Center.</em></h2>
+    </div>
+    <span class="badge badge-gold" style="font-size: 0.85rem; padding: 0.5rem 1rem;">ADMIN MODE</span>
+  </div>
+
+  <div class="admin-nav">
+    <button class="admin-tab active" onclick="switchTab('pricing')">Service Pricing</button>
+    <button class="admin-tab" onclick="switchTab('store')">Store Products</button>
+    <button class="admin-tab" onclick="switchTab('access')">User Access Control</button>
+  </div>
+
+  <!-- SECTION: SERVICE PRICING -->
+  <div id="section-pricing" class="admin-section active">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap: wrap; gap: 1rem;">
+      <h3 style="margin:0">Modify Service Pricing</h3>
+      <div style="display:flex; gap:0.5rem">
+        <button class="btn btn-ghost btn-sm" style="border-color:var(--accent); color:var(--accent)" onclick="addNewPriceRow()">+ Add Service</button>
+        <button class="btn btn-primary btn-sm" onclick="updateAllPrices()">Save All Prices</button>
+      </div>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Service Name</th>
+            <th>Category</th>
+            <th>Original Price (INR)</th>
+            <th>Discount Price (INR)</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="pricing-rows">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION: STORE PRODUCTS -->
+  <div id="section-store" class="admin-section">
+    <h3 style="margin-bottom:1.5rem" id="store-form-title">Add Store Product</h3>
+    <form class="admin-form" id="store-product-form" onsubmit="handleStoreSubmit(event)">
+      <input type="hidden" id="store-item-id"/>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="store-title">Product Title*</label>
+          <input type="text" id="store-title" required placeholder="e.g. CipherKeep Pro"/>
+        </div>
+        <div class="form-group">
+          <label for="store-category">Category</label>
+          <select id="store-category">
+            <option value="cybersecurity">Cybersecurity</option>
+            <option value="web">Web Development</option>
+            <option value="project">Project Development</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="store-price">Base Price (INR)*</label>
+          <input type="number" step="0.01" id="store-price" required placeholder="Original Price"/>
+        </div>
+        <div class="form-group">
+          <label for="store-sale-price">Sale Price (INR)</label>
+          <input type="number" step="0.01" id="store-sale-price" placeholder="Leave empty for no discount"/>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="store-thumbnail">Thumbnail URL / Drive link</label>
+          <input type="text" id="store-thumbnail" placeholder="e.g. Google Drive sharing link"/>
+        </div>
+        <div class="form-group">
+          <label for="store-tech">Tech Stack (comma separated)</label>
+          <input type="text" id="store-tech" placeholder="python,flask,js"/>
+        </div>
+        <div class="form-group">
+          <label for="store-source-link">Source Code Link (GitHub / Drive)*</label>
+          <input type="url" id="store-source-link" required placeholder="https://github.com/... or Google Drive link"/>
+        </div>
+        <div class="form-group">
+          <label for="store-guide-link">Setup Guide Link (Google Doc, Notion, etc.)</label>
+          <input type="url" id="store-guide-link" placeholder="https://docs.google.com/document/..."/>
+        </div>
+        <div class="form-group" style="justify-content: flex-end;">
+          <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; margin-bottom: 0.5rem; height: 100%;">
+            <input type="checkbox" id="store-is-public" checked style="width:18px; height:18px; cursor:pointer; accent-color:var(--accent)"/>
+            <span style="font-size:0.9rem; font-weight:500;">Public (Visible in Store)</span>
+          </label>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:1.5rem">
+        <label for="store-desc">Description</label>
+        <textarea id="store-desc" rows="3" placeholder="Explain features, deliverables, details..."></textarea>
+      </div>
+      <div class="action-btn-group">
+        <button type="submit" class="btn btn-primary btn-sm" id="store-submit-btn">Save Product</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="store-cancel-btn" style="display:none" onclick="resetStoreForm()">Cancel Edit</button>
+      </div>
+    </form>
+
+    <h3 style="margin-bottom:1.5rem">Existing Products</h3>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Thumbnail</th>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Visibility</th>
+            <th>Price (Original / Discount)</th>
+            <th>Tech Stack</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="store-rows">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION: USER ACCESS CONTROL -->
+  <div id="section-access" class="admin-section">
+    <h3 style="margin-bottom:1.5rem">Grant Project Access</h3>
+    <form class="admin-form" onsubmit="handleAccessSubmit(event)">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="access-user">Select Registered User*</label>
+          <select id="access-user" required>
+            <option value="">-- Choose User --</option>
+            <!-- Populated by JS -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="access-project">Choose Project / Product Title*</label>
+          <select id="access-project" required onchange="autoPopulateProjectLink()">
+            <option value="">-- Choose Product --</option>
+            <!-- Populated by JS -->
+          </select>
+        </div>
+        <div class="form-group" style="grid-column: span 2">
+          <label for="access-link">Google Drive / Source Code URL*</label>
+          <input type="url" id="access-link" required placeholder="https://drive.google.com/drive/folders/..."/>
+        </div>
+        <div class="form-group" style="grid-column: span 2">
+          <label for="access-guide-link">Setup & Build Guide URL (Google Doc, Notion, etc.)</label>
+          <input type="url" id="access-guide-link" placeholder="https://docs.google.com/document/..."/>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Grant Vault Access</button>
+    </form>
+
+    <h3 style="margin-bottom:1.5rem">Current Access Grants</h3>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Project Title</th>
+            <th>Access Link</th>
+            <th>Guide Link</th>
+            <th>Granted Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="access-rows">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="status-toast" id="toast">
+  <span id="toast-icon">ℹ️</span>
+  <span id="toast-msg">Loading...</span>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-top">
+    <div class="footer-brand"><a href="index.html" class="logo">V<em> Royals</em> Studio</a><p>Premium digital development and cybersecurity services.</p></div>
+  </div>
+  <div class="footer-bottom"><p>© <span id="footer-year">2026</span> V Royals Studio.</p></div>
+</footer>
+
+<script src="js/shared.js"></script>
+<script>
+  // Global States
+  let pricingData = [];
+  let storeProducts = [];
+  let usersList = [];
+  let accessGrants = [];
+
+  function switchTab(tabId) {
+    document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+    
+    // Find button
+    const btn = Array.from(document.querySelectorAll('.admin-tab')).find(b => b.onclick.toString().includes(`'${tabId}'`));
+    if (btn) btn.classList.add('active');
+    
+    const sec = document.getElementById(`section-${tabId}`);
+    if (sec) sec.classList.add('active');
+  }
+
+  function showToast(msg, type = 'info') {
+    const toast = document.getElementById('toast');
+    const msgEl = document.getElementById('toast-msg');
+    const iconEl = document.getElementById('toast-icon');
+    
+    toast.className = `status-toast visible ${type}`;
+    msgEl.textContent = msg;
+    
+    if (type === 'success') iconEl.textContent = '✅';
+    else if (type === 'error') iconEl.textContent = '❌';
+    else iconEl.textContent = 'ℹ️';
+
+    setTimeout(() => {
+      toast.classList.remove('visible');
+    }, 3500);
+  }
+
+  // Load Pricing
+  async function loadPricing() {
+    try {
+      const resp = await fetch('/api/admin/pricing');
+      pricingData = await resp.json();
+      
+      const tbody = document.getElementById('pricing-rows');
+      tbody.innerHTML = '';
+      
+      pricingData.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.id = `row-${p.id}`;
+        tr.innerHTML = `
+          <td>
+            <div id="name-container-${p.id}" style="display:flex; align-items:center;">
+              <span id="name-display-${p.id}" style="font-weight:600">${p.service_name}</span>
+              <span id="name-edit-btn-${p.id}" class="edit-pencil" style="cursor:pointer; font-size:0.9rem; opacity:0.5; margin-left:0.5rem;" onclick="enableNameEdit(${p.id}, '${p.service_name.replace(/'/g, "\\'")}')" title="Edit Name">✏️</span>
+            </div>
+          </td>
+          <td>
+            <div id="cat-container-${p.id}" style="display:flex; align-items:center;">
+              <span id="cat-display-${p.id}" class="badge">${p.category.toUpperCase()}</span>
+              <span id="cat-edit-btn-${p.id}" class="edit-pencil" style="cursor:pointer; font-size:0.9rem; opacity:0.5; margin-left:0.5rem;" onclick="enableCatEdit(${p.id}, '${p.category}')" title="Edit Category">✏️</span>
+            </div>
+          </td>
+          <td><input type="number" id="base-${p.id}" value="${p.base_price}" oninput="queueAutoUpdate(${p.id})" style="background:var(--surface2); border:1px solid var(--border); color:#fff; border-radius:5px; padding:0.4rem; width:100px; transition: border-color 0.2s"/></td>
+          <td><input type="number" id="sale-${p.id}" value="${p.sale_price || ''}" placeholder="No discount" oninput="queueAutoUpdate(${p.id})" style="background:var(--surface2); border:1px solid var(--border); color:#fff; border-radius:5px; padding:0.4rem; width:100px; transition: border-color 0.2s"/></td>
+          <td>
+            <div style="display:flex; align-items:center; justify-content:space-between; width:100%">
+              <span id="status-${p.id}" style="font-size:0.85rem; color:var(--muted); font-weight: 500;">Saved</span>
+              <button class="btn btn-ghost btn-sm" style="padding:0.3rem 0.5rem; font-size:0.75rem; border-color:rgba(255,255,255,0.05); color:var(--accent2); margin-left:1rem" onclick="deletePricing(${p.id}, '${p.service_name.replace(/'/g, "\\'")}')" title="Delete Service">🗑️</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (e) {
+      showToast("Failed to load pricing table", "error");
+    }
+  }
+
+  function enableNameEdit(id, currentName) {
+    const container = document.getElementById(`name-container-${id}`);
+    if (!container) return;
+    container.innerHTML = `
+      <input type="text" id="name-input-${id}" value="${currentName}" oninput="queueAutoUpdate(${id})" style="background:var(--surface2); border:1px solid var(--accent); color:#fff; border-radius:5px; padding:0.25rem 0.5rem; width:180px; font-size:0.9rem;"/>
+    `;
+    const nameInput = document.getElementById(`name-input-${id}`);
+    if (nameInput) nameInput.focus();
+  }
+
+  function enableCatEdit(id, currentCat) {
+    const container = document.getElementById(`cat-container-${id}`);
+    if (!container) return;
+    container.innerHTML = `
+      <select id="cat-select-${id}" onchange="queueAutoUpdate(${id})" style="background:var(--surface2); border:1px solid var(--accent); color:#fff; border-radius:5px; padding:0.25rem 0.5rem; width:130px; font-size:0.9rem;">
+        <option value="web" ${currentCat === 'web' ? 'selected' : ''}>WEB</option>
+        <option value="project" ${currentCat === 'project' ? 'selected' : ''}>PROJECT</option>
+        <option value="cybersecurity" ${currentCat === 'cybersecurity' ? 'selected' : ''}>CYBERSECURITY</option>
+      </select>
+    `;
+    const catSelect = document.getElementById(`cat-select-${id}`);
+    if (catSelect) catSelect.focus();
+  }
+
+  let pricingDebounceTimers = {};
+  
+  function queueAutoUpdate(id) {
+    const statusEl = document.getElementById(`status-${id}`);
+    if (statusEl) {
+      statusEl.textContent = "Typing...";
+      statusEl.style.color = "var(--accent)";
+    }
+    
+    if (pricingDebounceTimers[id]) {
+      clearTimeout(pricingDebounceTimers[id]);
+    }
+    
+    pricingDebounceTimers[id] = setTimeout(async () => {
+      await updatePriceSilent(id);
+    }, 1000); // 1-second debounce
+  }
+
+  async function updatePriceSilent(id) {
+    const baseInput = document.getElementById(`base-${id}`);
+    const saleInput = document.getElementById(`sale-${id}`);
+    const statusEl = document.getElementById(`status-${id}`);
+    
+    if (!baseInput || !saleInput) return false;
+    
+    const base = baseInput.value;
+    const sale = saleInput.value;
+    
+    const p = pricingData.find(item => item.id === id) || {};
+    
+    const nameInput = document.getElementById(`name-input-${id}`);
+    const service_name = nameInput ? nameInput.value : p.service_name;
+    
+    const catSelect = document.getElementById(`cat-select-${id}`);
+    const category = catSelect ? catSelect.value : p.category;
+    
+    if (statusEl) {
+      statusEl.textContent = "Saving...";
+      statusEl.style.color = "var(--accent)";
+    }
+    
+    baseInput.style.borderColor = 'var(--accent)';
+    saleInput.style.borderColor = 'var(--accent)';
+    
+    try {
+      const resp = await fetch('/api/admin/pricing/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          id, 
+          base_price: parseFloat(base), 
+          sale_price: sale ? parseFloat(sale) : '',
+          service_name,
+          category
+        })
+      });
+      const result = await resp.json();
+      if (result.success) {
+        if (statusEl) {
+          statusEl.textContent = "Saved ✓";
+          statusEl.style.color = "var(--green)";
+        }
+        baseInput.style.borderColor = 'var(--green)';
+        saleInput.style.borderColor = 'var(--green)';
+        setTimeout(() => {
+          baseInput.style.borderColor = 'var(--border)';
+          saleInput.style.borderColor = 'var(--border)';
+        }, 1500);
+        
+        if (p) {
+          p.base_price = base;
+          p.sale_price = sale;
+          p.service_name = service_name;
+          p.category = category;
+        }
+        return true;
+      } else {
+        if (statusEl) {
+          statusEl.textContent = "Error ✗";
+          statusEl.style.color = "var(--accent2)";
+        }
+        baseInput.style.borderColor = 'var(--accent2)';
+        saleInput.style.borderColor = 'var(--accent2)';
+        showToast(result.error || "Failed to update price", "error");
+        return false;
+      }
+    } catch(e) {
+      if (statusEl) {
+        statusEl.textContent = "Error ✗";
+        statusEl.style.color = "var(--accent2)";
+      }
+      baseInput.style.borderColor = 'var(--accent2)';
+      saleInput.style.borderColor = 'var(--accent2)';
+      showToast("Error updating price", "error");
+      return false;
+    }
+  }
+
+  async function updateAllPrices() {
+    const updates = [];
+    pricingData.forEach(p => {
+      const baseInput = document.getElementById(`base-${p.id}`);
+      const saleInput = document.getElementById(`sale-${p.id}`);
+      
+      const nameInput = document.getElementById(`name-input-${p.id}`);
+      const service_name = nameInput ? nameInput.value : p.service_name;
+      
+      const catSelect = document.getElementById(`cat-select-${p.id}`);
+      const category = catSelect ? catSelect.value : p.category;
+      
+      if (baseInput && saleInput) {
+        updates.push({
+          id: p.id,
+          base_price: parseFloat(baseInput.value),
+          sale_price: saleInput.value ? parseFloat(saleInput.value) : '',
+          service_name,
+          category
+        });
+        
+        const statusEl = document.getElementById(`status-${p.id}`);
+        if (statusEl) {
+          statusEl.textContent = "Saving...";
+          statusEl.style.color = "var(--accent)";
+        }
+        baseInput.style.borderColor = 'var(--accent)';
+        saleInput.style.borderColor = 'var(--accent)';
+      }
+    });
+    
+    try {
+      showToast("Saving all prices...", "info");
+      const resp = await fetch('/api/admin/pricing/batch-update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+      const result = await resp.json();
+      if (result.success) {
+        showToast("All service prices updated successfully!", "success");
+        pricingData.forEach((p, idx) => {
+          const u = updates[idx];
+          p.base_price = u.base_price;
+          p.sale_price = u.sale_price;
+          p.service_name = u.service_name;
+          p.category = u.category;
+          
+          const baseInput = document.getElementById(`base-${p.id}`);
+          const saleInput = document.getElementById(`sale-${p.id}`);
+          const statusEl = document.getElementById(`status-${p.id}`);
+          
+          if (statusEl) {
+            statusEl.textContent = "Saved ✓";
+            statusEl.style.color = "var(--green)";
+          }
+          if (baseInput) baseInput.style.borderColor = 'var(--green)';
+          if (saleInput) saleInput.style.borderColor = 'var(--green)';
+          
+          setTimeout(() => {
+            if (baseInput) baseInput.style.borderColor = 'var(--border)';
+            if (saleInput) saleInput.style.borderColor = 'var(--border)';
+          }, 1500);
+        });
+      } else {
+        showToast(result.error || "Failed to update all prices", "error");
+        pricingData.forEach(p => {
+          const statusEl = document.getElementById(`status-${p.id}`);
+          if (statusEl) {
+            statusEl.textContent = "Error ✗";
+            statusEl.style.color = "var(--accent2)";
+          }
+        });
+      }
+    } catch(e) {
+      showToast("Error updating all prices", "error");
+      pricingData.forEach(p => {
+        const statusEl = document.getElementById(`status-${p.id}`);
+        if (statusEl) {
+          statusEl.textContent = "Error ✗";
+          statusEl.style.color = "var(--accent2)";
+        }
+      });
+    }
+  }
+
+  function addNewPriceRow() {
+    const tbody = document.getElementById('pricing-rows');
+    const tempId = 'new-' + Date.now();
+    
+    const tr = document.createElement('tr');
+    tr.id = `row-${tempId}`;
+    tr.innerHTML = `
+      <td>
+        <input type="text" id="name-${tempId}" placeholder="Service Name" style="background:var(--surface2); border:1px solid var(--accent); color:#fff; border-radius:5px; padding:0.4rem; width:220px"/>
+      </td>
+      <td>
+        <select id="cat-${tempId}" style="background:var(--surface2); border:1px solid var(--accent); color:#fff; border-radius:5px; padding:0.4rem; width:140px">
+          <option value="web">WEB</option>
+          <option value="project">PROJECT</option>
+          <option value="cybersecurity">CYBERSECURITY</option>
+        </select>
+      </td>
+      <td>
+        <input type="number" id="base-${tempId}" placeholder="Base Price" style="background:var(--surface2); border:1px solid var(--accent); color:#fff; border-radius:5px; padding:0.4rem; width:100px"/>
+      </td>
+      <td>
+        <input type="number" id="sale-${tempId}" placeholder="Discount Price" style="background:var(--surface2); border:1px solid var(--accent); color:#fff; border-radius:5px; padding:0.4rem; width:100px"/>
+      </td>
+      <td>
+        <div class="action-btn-group">
+          <button class="btn btn-primary btn-sm" style="padding:0.3rem 0.6rem; font-size:0.75rem;" onclick="saveNewPriceRow('${tempId}')">✓ Save</button>
+          <button class="btn btn-ghost btn-sm" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-color:var(--accent2); color:var(--accent2)" onclick="cancelNewPriceRow('${tempId}')">✕</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+    const nameInput = document.getElementById(`name-${tempId}`);
+    if (nameInput) nameInput.focus();
+  }
+
+  function cancelNewPriceRow(tempId) {
+    const row = document.getElementById(`row-${tempId}`);
+    if (row) row.remove();
+  }
+
+  async function saveNewPriceRow(tempId) {
+    const nameInput = document.getElementById(`name-${tempId}`);
+    const catSelect = document.getElementById(`cat-${tempId}`);
+    const baseInput = document.getElementById(`base-${tempId}`);
+    const saleInput = document.getElementById(`sale-${tempId}`);
+    
+    if (!nameInput || !baseInput) return;
+    
+    const name = nameInput.value.trim();
+    const category = catSelect.value;
+    const base = baseInput.value;
+    const sale = saleInput.value;
+    
+    if (!name) {
+      showToast("Please enter a service name", "error");
+      nameInput.focus();
+      return;
+    }
+    if (!base) {
+      showToast("Please enter a base price", "error");
+      baseInput.focus();
+      return;
+    }
+    
+    try {
+      showToast("Adding new service...", "info");
+      const resp = await fetch('/api/admin/pricing/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_name: name,
+          category: category,
+          base_price: parseFloat(base),
+          sale_price: sale ? parseFloat(sale) : ''
+        })
+      });
+      const result = await resp.json();
+      if (result.success) {
+        showToast("Service added successfully!", "success");
+        loadPricing();
+      } else {
+        showToast(result.error || "Failed to add service", "error");
+      }
+    } catch (e) {
+      showToast("Error adding service", "error");
+    }
+  }
+
+  async function deletePricing(id, name) {
+    if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+    try {
+      showToast(`Deleting ${name}...`, "info");
+      const resp = await fetch(`/api/admin/pricing/delete/${id}`, {
+        method: 'POST'
+      });
+      const result = await resp.json();
+      if (result.success) {
+        showToast("Service deleted successfully", "success");
+        loadPricing();
+      } else {
+        showToast(result.error || "Failed to delete service", "error");
+      }
+    } catch (e) {
+      showToast("Error deleting service", "error");
+    }
+  }
+
+  // Store Management
+  async function loadStore() {
+    try {
+      const resp = await fetch('/api/store?all=true'); // Fetch all products for admin console
+      storeProducts = await resp.json();
+      
+      // Populate Table
+      const tbody = document.getElementById('store-rows');
+      tbody.innerHTML = '';
+      
+      storeProducts.forEach(p => {
+        const visibilityBadge = p.is_public ? 
+          '<span class="badge badge-green">PUBLIC</span>' : 
+          '<span class="badge" style="background:rgba(255,255,255,0.05); color:var(--muted)">PRIVATE</span>';
+          
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><img src="${p.thumbnail}" alt="${p.title}" style="width:60px; height:36px; object-fit:cover; border-radius:4px; border:1px solid var(--border)"/></td>
+          <td style="font-weight:600">${p.title}</td>
+          <td><span class="badge badge-gold">${p.category.toUpperCase()}</span></td>
+          <td>${visibilityBadge}</td>
+          <td class="mono">₹${p.sale_price} ${p.sale_price < p.original_price ? `<span style="text-decoration:line-through;color:var(--muted);font-size:0.75rem">₹${p.original_price}</span>` : ''}</td>
+          <td style="font-size:0.8rem; color:var(--muted)">${p.tech_stack || '-'}</td>
+          <td>
+            <div class="action-btn-group">
+              <button class="btn btn-ghost btn-sm" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-color:var(--accent)" onclick="editStoreProduct(${p.id})">Edit</button>
+              <button class="btn btn-ghost btn-sm" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-color:var(--accent2)" onclick="deleteStoreProduct(${p.id})">Delete</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Also populate the product dropdown in User Access section
+      const projectSelect = document.getElementById('access-project');
+      projectSelect.innerHTML = '<option value="">-- Choose Product --</option>';
+      storeProducts.forEach(p => {
+        projectSelect.innerHTML += `<option value="${p.title}">${p.title}</option>`;
+      });
+
+    } catch (e) {
+      showToast("Failed to load store items", "error");
+    }
+  }
+
+  function editStoreProduct(id) {
+    const p = storeProducts.find(item => item.id === id);
+    if (!p) return;
+    
+    document.getElementById('store-item-id').value = p.id;
+    document.getElementById('store-title').value = p.title;
+    document.getElementById('store-category').value = p.category;
+    document.getElementById('store-price').value = p.original_price;
+    document.getElementById('store-sale-price').value = p.sale_price < p.original_price ? p.sale_price : '';
+    document.getElementById('store-thumbnail').value = p.thumbnail;
+    document.getElementById('store-tech').value = p.tech_stack || '';
+    document.getElementById('store-desc').value = p.description || '';
+    document.getElementById('store-source-link').value = p.source_code_link || '';
+    document.getElementById('store-guide-link').value = p.guide_link || '';
+    document.getElementById('store-is-public').checked = p.is_public;
+    
+    document.getElementById('store-form-title').textContent = "Edit Store Product";
+    document.getElementById('store-submit-btn').textContent = "Update Product";
+    document.getElementById('store-cancel-btn').style.display = "inline-block";
+    
+    // Scroll to form
+    document.getElementById('store-product-form').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function resetStoreForm() {
+    document.getElementById('store-item-id').value = '';
+    document.getElementById('store-product-form').reset();
+    document.getElementById('store-is-public').checked = true;
+    document.getElementById('store-source-link').value = '';
+    document.getElementById('store-guide-link').value = '';
+    document.getElementById('store-form-title').textContent = "Add Store Product";
+    document.getElementById('store-submit-btn').textContent = "Save Product";
+    document.getElementById('store-cancel-btn').style.display = "none";
+  }
+
+  function cleanThumbnailUrl(url) {
+    if (!url) return url;
+    url = url.trim();
+    // Extract ID from standard sharing URL: drive.google.com/file/d/FILE_ID/view...
+    const matchD = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (matchD && matchD[1]) {
+      return `https://lh3.googleusercontent.com/d/${matchD[1]}`;
+    }
+    // Extract ID from direct URL queries: id=FILE_ID
+    const matchQuery = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (matchQuery && matchQuery[1]) {
+      return `https://lh3.googleusercontent.com/d/${matchQuery[1]}`;
+    }
+    return url;
+  }
+
+  async function handleStoreSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('store-item-id').value;
+    
+    const rawThumb = document.getElementById('store-thumbnail').value;
+    const thumbnail_url = cleanThumbnailUrl(rawThumb);
+    
+    const payload = {
+      title: document.getElementById('store-title').value,
+      category: document.getElementById('store-category').value,
+      price: parseFloat(document.getElementById('store-price').value),
+      sale_price: document.getElementById('store-sale-price').value ? parseFloat(document.getElementById('store-sale-price').value) : '',
+      thumbnail_url: thumbnail_url,
+      tech_stack: document.getElementById('store-tech').value,
+      description: document.getElementById('store-desc').value,
+      source_code_link: document.getElementById('store-source-link').value,
+      guide_link: document.getElementById('store-guide-link').value,
+      is_public: document.getElementById('store-is-public').checked
+    };
+
+    const url = id ? `/api/admin/store/update/${id}` : '/api/admin/store/add';
+    
+    try {
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const res = await resp.json();
+      if (res.success) {
+        showToast(id ? "Product updated successfully!" : "New product added successfully!", "success");
+        resetStoreForm();
+        loadStore();
+      } else {
+        showToast(res.error || "Failed to save product", "error");
+      }
+    } catch(err) {
+      showToast("Error saving product details", "error");
+    }
+  }
+
+  async function deleteStoreProduct(id) {
+    if (!confirm("Are you sure you want to delete this product? This will remove it from the catalog.")) return;
+    try {
+      const resp = await fetch(`/api/admin/store/delete/${id}`, { method: 'POST' });
+      const res = await resp.json();
+      if (res.success) {
+        showToast("Product deleted successfully", "success");
+        loadStore();
+      } else {
+        showToast(res.error || "Deletion failed", "error");
+      }
+    } catch(e) {
+      showToast("Error deleting product", "error");
+    }
+  }
+
+  // User Access Control
+  async function loadUsers() {
+    try {
+      const resp = await fetch('/api/admin/users');
+      usersList = await resp.json();
+      
+      const select = document.getElementById('access-user');
+      select.innerHTML = '<option value="">-- Choose User --</option>';
+      usersList.forEach(u => {
+        select.innerHTML += `<option value="${u.id}">${u.email} (${u.full_name || 'No Name'})</option>`;
+      });
+    } catch (e) {
+      console.error("Users list load failed", e);
+    }
+  }
+
+  async function loadAccessGrants() {
+    try {
+      const resp = await fetch('/api/admin/access');
+      accessGrants = await resp.json();
+      
+      const tbody = document.getElementById('access-rows');
+      tbody.innerHTML = '';
+      
+      accessGrants.forEach(g => {
+        const dateStr = g.created_at ? new Date(g.created_at).toLocaleDateString() : '-';
+        const guideLinkHtml = g.guide_link ? 
+          `<a href="${g.guide_link}" target="_blank" style="color:var(--accent2); font-size:0.85rem; text-decoration:underline">Guide Link</a>` : 
+          '<span style="color:var(--muted)">-</span>';
+          
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <div style="font-weight:600">${g.full_name || 'User'}</div>
+            <div style="font-size:0.75rem; color:var(--muted)">${g.email}</div>
+          </td>
+          <td><span class="badge">${g.title}</span></td>
+          <td><a href="${g.drive_link}" target="_blank" style="color:var(--accent); font-size:0.85rem; text-decoration:underline">Drive Link</a></td>
+          <td>${guideLinkHtml}</td>
+          <td class="mono" style="font-size:0.8rem">${dateStr}</td>
+          <td>
+            <button class="btn btn-ghost btn-sm" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-color:var(--accent2)" onclick="revokeAccess(${g.id})">Revoke</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (e) {
+      showToast("Failed to load access list", "error");
+    }
+  }
+
+  function autoPopulateProjectLink() {
+    const proj = document.getElementById('access-project').value;
+    const linkInput = document.getElementById('access-link');
+    const guideInput = document.getElementById('access-guide-link');
+    
+    // Find the product in storeProducts list matching the title
+    const p = storeProducts.find(item => item.title === proj);
+    if (p) {
+      linkInput.value = p.source_code_link || "";
+      guideInput.value = p.guide_link || "";
+    } else {
+      linkInput.value = "";
+      guideInput.value = "";
+    }
+  }
+
+  async function handleAccessSubmit(e) {
+    e.preventDefault();
+    const payload = {
+      user_id: parseInt(document.getElementById('access-user').value),
+      title: document.getElementById('access-project').value,
+      drive_link: document.getElementById('access-link').value,
+      guide_link: document.getElementById('access-guide-link').value
+    };
+
+    try {
+      const resp = await fetch('/api/admin/access/grant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const res = await resp.json();
+      if (res.success) {
+        showToast("Project access granted successfully!", "success");
+        document.getElementById('access-link').value = '';
+        document.getElementById('access-guide-link').value = '';
+        document.getElementById('access-project').value = '';
+        loadAccessGrants();
+      } else {
+        showToast(res.error || "Failed to grant access", "error");
+      }
+    } catch (err) {
+      showToast("Error granting access", "error");
+    }
+  }
+
+  async function revokeAccess(id) {
+    if (!confirm("Are you sure you want to revoke this user's project access?")) return;
+    try {
+      const resp = await fetch(`/api/admin/access/revoke/${id}`, { method: 'POST' });
+      const res = await resp.json();
+      if (res.success) {
+        showToast("Access revoked successfully", "success");
+        loadAccessGrants();
+      } else {
+        showToast(res.error || "Revocation failed", "error");
+      }
+    } catch (e) {
+      showToast("Error revoking access", "error");
+    }
+  }
+
+  // Initialization
+  window.addEventListener('DOMContentLoaded', () => {
+    loadPricing();
+    loadStore();
+    loadUsers();
+    loadAccessGrants();
+  });
+</script>
+</body>
+</html>

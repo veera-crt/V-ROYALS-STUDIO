@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About — V Royals Studio</title>
+  <link rel="icon" type="image/png" href="assets/images/favicon.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/vroyals_theme.css"/>
+  <script>
+    (function() {
+      try {
+        const u = sessionStorage.getItem('vroyals_user');
+        if (u && JSON.parse(u).logged_in) {
+          document.documentElement.classList.add('user-logged-in');
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+    .about-img { border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 3/4; border: 1px solid var(--border); }
+    .about-img img { width: 100%; height: 100%; object-fit: cover; }
+    .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin: 2.5rem 0; padding: 2rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .ab-stat-num { font-family: 'Syne'; font-size: 2rem; font-weight: 800; color: var(--accent); display: block; }
+    .ab-stat-lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .skills-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-top: 1.5rem; }
+    .skill-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem; }
+    .skill-item span { color: var(--accent); font-size: 1rem; }
+    @media (max-width: 900px) { .about-grid { grid-template-columns: 1fr; gap: 3rem; } .about-img { aspect-ratio: 1/1; } .stats-bar { grid-template-columns: repeat(3, 1fr); } .skills-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 480px) { .stats-bar { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+<nav id="main-nav">
+  <a href="index.html" class="logo">V<em> Royals</em> Studio</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li>
+    <li><a href="youtube.html">YouTube</a></li>
+    <li><a href="projects.html">Store</a></li><li><a href="about.html">About</a></li>
+    <li class="nav-logged-out"><a href="login.html">Login</a></li>
+    <li class="nav-logged-in"><a href="my-reels.html" style="color:var(--accent); font-weight:600">Your Items</a></li>
+    <li class="nav-logged-in nav-profile">
+      <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); padding:0.4rem 0.8rem; border-radius:30px; border:1px solid var(--border); margin-left:0.5rem">
+        <span class="user-avatar-placeholder">👤</span>
+        <span class="user-name-placeholder" style="font-size:0.8rem; font-weight:600">User</span>
+        <a href="/api/logout" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" title="Logout" style="display:flex; align-items:center; margin-left:0.4rem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted); transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </a>
+      </div>
+    </li>
+    <li><a href="contact.html" class="btn btn-primary btn-sm">Hire Me</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+<script>
+  (function() {
+    try {
+      const u = sessionStorage.getItem('vroyals_user');
+      if (u) {
+        const user = JSON.parse(u);
+        if (user.logged_in) {
+          const firstName = (user.full_name || 'User').split(' ')[0];
+          document.querySelectorAll('.user-name-placeholder').forEach(el => {
+            el.textContent = firstName;
+          });
+          document.querySelectorAll('.user-avatar-placeholder').forEach(el => {
+            if (user.avatar) {
+              el.innerHTML = `<img src="${user.avatar}" style="width:20px; height:20px; border-radius:50%; display:block">`;
+            }
+          });
+        }
+      }
+    } catch(e) {}
+  })();
+</script>
+<div class="mobile-drawer" id="mobile-drawer">
+  <a href="index.html">Home</a><a href="services.html">Services</a>
+  <a href="youtube.html">YouTube</a><a href="projects.html">Store</a><a href="about.html">About</a>
+  <a href="login.html" class="nav-logged-out">Login</a>
+  <a href="my-reels.html" class="nav-logged-in" style="color:var(--accent); font-weight:600">Your Items</a>
+  <a href="/api/logout" class="nav-logged-in" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" style="color:var(--muted)">Logout 🚪</a>
+  <a href="contact.html" style="color:var(--accent)">Hire Me →</a>
+  <p class="mobile-drawer-footer">V Royals Studio © 2025</p>
+</div>
+
+<section>
+  <div class="about-grid">
+    <div class="about-img reveal"><img src="assets/images/about_founder.jpg" alt="Veerapandi" loading="lazy"/></div>
+    <div class="reveal">
+      <div class="section-label">Founder</div>
+      <h1>Passion Meets<br><em style="font-style:normal;color:var(--accent)">Precision.</em></h1>
+      <p style="margin-top:1rem;font-size:1.05rem">Hi, I'm Veerapandi — the engineer behind V Royals Studio. I believe that software systems and secure digital assets should be robust, scalable, and safe, protecting your business from day one.</p>
+      <p style="margin-top:1rem">I bridge the gap between custom system implementation and advanced cybersecurity analysis across full-stack development, project scoping, and vulnerability remediation. Every system I secure or build is treated with royal attention to detail.</p>
+      <div class="stats-bar hero-stats">
+        <div><span class="stat-num ab-stat-num" id="stat-years" data-target="1">0</span><span class="ab-stat-lbl">Years Exp.</span></div>
+        <div><span class="stat-num ab-stat-num" id="stat-projects" data-target="0">0</span><span class="ab-stat-lbl">Projects</span></div>
+        <div><span class="stat-num ab-stat-num" id="stat-clients" data-target="0">0</span><span class="ab-stat-lbl">Clients</span></div>
+      </div>
+      <h3 style="font-size:1.1rem;margin-bottom:0.5rem">Core Skills</h3>
+      <div class="skills-grid">
+        <div class="skill-item v-card" style="padding: 0.75rem 1rem;"><span>🔒</span> Cybersecurity Testing</div>
+        <div class="skill-item v-card" style="padding: 0.75rem 1rem;"><span>💻</span> Web Development</div>
+        <div class="skill-item v-card" style="padding: 0.75rem 1rem;"><span>🛡️</span> Vulnerability Audits</div>
+        <div class="skill-item v-card" style="padding: 0.75rem 1rem;"><span>⚙️</span> Project Development</div>
+        <div class="skill-item v-card" style="padding: 0.75rem 1rem;"><span>⚡</span> React / Next.js</div>
+        <div class="skill-item v-card" style="padding: 0.75rem 1rem;"><span>📝</span> Bug Fixing & Reports</div>
+      </div>
+      <div style="display:flex;gap:1rem;margin-top:2rem;flex-wrap:wrap">
+        <a href="contact.html" class="btn btn-primary">Work With Me</a>
+        <a href="services.html" class="btn btn-ghost">View Services →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-top">
+    <div class="footer-brand"><a href="index.html" class="logo">V<em> Royals</em> Studio</a><p>Premium digital development and cybersecurity services.</p></div>
+    <div class="footer-links"><h5>Pages</h5><ul><li><a href="services.html">Services</a></li><li><a href="projects.html">Store</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><p>© <span id="footer-year">2025</span> V Royals Studio.</p><div class="social-row"><a href="#" class="social-btn">▶</a><a href="#" class="social-btn">📸</a><a href="#" class="social-btn">𝕏</a></div></div>
+</footer>
+<script src="js/shared.js"></script>
+</body>
+</html>

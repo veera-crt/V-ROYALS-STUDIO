@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact — V Royals Studio</title>
+  <link rel="icon" type="image/png" href="assets/images/favicon.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/vroyals_theme.css"/>
+  <script>
+    (function() {
+      try {
+        const u = sessionStorage.getItem('vroyals_user');
+        if (u && JSON.parse(u).logged_in) {
+          document.documentElement.classList.add('user-logged-in');
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+    .contact-layout { display: grid; grid-template-columns: 1fr 1.1fr; gap: 5rem; align-items: start; }
+    .channels { display: flex; flex-direction: column; gap: 0.85rem; margin: 2.5rem 0; }
+    .channel-link { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); transition: var(--transition); }
+    .channel-link { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); transition: var(--transition); }
+    .ch-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+    .ch-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .ch-value { font-weight: 600; font-size: 0.95rem; margin-top: 0.1rem; }
+    .instagram-featured-card:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 16px 36px rgba(225, 48, 108, 0.25), 0 0 20px rgba(225, 48, 108, 0.1);
+      border-color: rgba(225, 48, 108, 0.9) !important;
+      background: linear-gradient(135deg, rgba(240, 148, 51, 0.22) 0%, rgba(230, 104, 60, 0.25) 25%, rgba(220, 39, 67, 0.28) 50%, rgba(204, 35, 102, 0.25) 75%, rgba(188, 24, 136, 0.22) 100%) !important;
+    }
+    .contact-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2.5rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .field { display: flex; flex-direction: column; gap: 0.45rem; }
+    label { font-size: 0.8rem; font-weight: 500; color: var(--muted); font-family: 'Outfit'; }
+    input, textarea, select {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 0.9rem 1rem; color: var(--text); font-family: 'Plus Jakarta Sans'; font-size: 0.9rem;
+      outline: none; transition: border-color 0.25s; width: 100%; box-sizing: border-box;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+    input::placeholder, textarea::placeholder { color: var(--muted); }
+    select option { background: var(--surface2); }
+    textarea { resize: vertical; min-height: 130px; }
+    .form-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem; }
+    .form-note { font-size: 0.78rem; color: var(--muted); }
+    #formSuccess { display:none; padding:1rem; border-radius:var(--radius-sm); background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.25); color:#22c55e; font-size:.875rem; margin-top:1rem; }
+    
+    /* Responsive Fixes */
+    @media (max-width: 960px) { 
+      .contact-layout { grid-template-columns: 1fr; gap: 4rem; } 
+      .page-hero { padding: 120px 5% 40px; }
+    }
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .contact-form { padding: 1.75rem; }
+      .contact-layout { gap: 3rem; }
+      h1 { font-size: 2.2rem; }
+    }
+    @media (max-width: 400px) {
+      .contact-form { padding: 1.25rem; }
+      .form-footer { flex-direction: column; align-items: flex-start; }
+      .form-footer button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<nav id="main-nav">
+  <a href="index.html" class="logo">V<em> Royals</em> Studio</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li>
+    <li><a href="youtube.html">YouTube</a></li>
+    <li><a href="projects.html">Store</a></li><li><a href="about.html">About</a></li>
+    <li class="nav-logged-out"><a href="login.html">Login</a></li>
+    <li class="nav-logged-in"><a href="my-reels.html" style="color:var(--accent); font-weight:600">Your Items</a></li>
+    <li class="nav-logged-in nav-profile">
+      <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); padding:0.4rem 0.8rem; border-radius:30px; border:1px solid var(--border); margin-left:0.5rem">
+        <span class="user-avatar-placeholder">👤</span>
+        <span class="user-name-placeholder" style="font-size:0.8rem; font-weight:600">User</span>
+        <a href="/api/logout" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" title="Logout" style="display:flex; align-items:center; margin-left:0.4rem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted); transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </a>
+      </div>
+    </li>
+    <li><a href="contact.html" class="btn btn-primary btn-sm">Hire Me</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+<script>
+  (function() {
+    try {
+      const u = sessionStorage.getItem('vroyals_user');
+      if (u) {
+        const user = JSON.parse(u);
+        if (user.logged_in) {
+          const firstName = (user.full_name || 'User').split(' ')[0];
+          document.querySelectorAll('.user-name-placeholder').forEach(el => {
+            el.textContent = firstName;
+          });
+          document.querySelectorAll('.user-avatar-placeholder').forEach(el => {
+            if (user.avatar) {
+              el.innerHTML = `<img src="${user.avatar}" style="width:20px; height:20px; border-radius:50%; display:block">`;
+            }
+          });
+        }
+      }
+    } catch(e) {}
+  })();
+</script>
+<div class="mobile-drawer" id="mobile-drawer">
+  <a href="index.html">Home</a><a href="services.html">Services</a>
+  <a href="youtube.html">YouTube</a><a href="projects.html">Store</a><a href="about.html">About</a>
+  <a href="login.html" class="nav-logged-out">Login</a>
+  <a href="my-reels.html" class="nav-logged-in" style="color:var(--accent); font-weight:600">Your Items</a>
+  <a href="/api/logout" class="nav-logged-in" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" style="color:var(--muted)">Logout 🚪</a>
+  <a href="contact.html" style="color:var(--accent)">Hire Me →</a>
+  <p class="mobile-drawer-footer">V Royals Studio © 2025</p>
+</div>
+
+<section style="padding-top: 140px">
+  <div class="container">
+    <div class="contact-layout">
+      <div class="reveal">
+        <div class="section-label">Direct Scoping</div>
+        <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text);">Quick Channels</h2>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Chat with me directly to scope, negotiate, and purchase custom assets instantly.</p>
+
+        <!-- Featured Instagram CTA Card -->
+        <a href="https://www.instagram.com/veerapandi_cybersecurity/" class="instagram-featured-card" style="display: block; position: relative; border-radius: var(--radius-md); padding: 1.75rem; background: linear-gradient(135deg, rgba(240, 148, 51, 0.15) 0%, rgba(230, 104, 60, 0.18) 25%, rgba(220, 39, 67, 0.2) 50%, rgba(204, 35, 102, 0.18) 75%, rgba(188, 24, 136, 0.15) 100%); border: 1px solid rgba(225, 48, 108, 0.4); transition: all 0.3s ease; text-decoration: none; overflow: hidden; margin-bottom: 1rem; box-shadow: 0 8px 32px rgba(225, 48, 108, 0.12);">
+          <!-- Glowing highlight effect in background -->
+          <div style="position: absolute; right: -50px; top: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(225, 48, 108, 0.25) 0%, transparent 70%); pointer-events: none;"></div>
+          
+          <div style="display: flex; align-items: center; gap: 1.25rem;">
+            <div class="ch-icon" style="background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 15px rgba(225,48,108,0.25);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            </div>
+            <div style="flex: 1;">
+              <div style="font-family: var(--font-ui); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--accent); font-weight: 700; margin-bottom: 0.25rem;">Best for Scoping & Buying</div>
+              <h4 style="font-size: 1.25rem; font-weight: 700; color: var(--text); margin: 0; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                Message on Instagram 
+                <span style="font-size: 0.7rem; padding: 0.2rem 0.6rem; border-radius: 100px; background: rgba(34, 197, 94, 0.15); color: #22c55e; font-family: var(--font-mono); font-weight: 600; letter-spacing: 0.05em;">Quick Reply (2-6h)</span>
+              </h4>
+              <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.35rem; line-height: 1.45;">Direct message scoping for instant quotes, customized source code licenses, and project collaboration.</p>
+            </div>
+            <div style="font-size: 1.5rem; color: var(--accent); padding-right: 0.25rem; font-weight: 700;">→</div>
+          </div>
+        </a>
+
+        <div class="channels" style="margin-top: 0; margin-bottom: 2rem;">
+          <a href="https://www.youtube.com/@itsveerapanditech" class="channel-link v-card" style="padding: 1rem 1.25rem;">
+            <div class="ch-icon" style="background:rgba(255,0,0,.12); width: 38px; height: 38px; border-radius: 8px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #ff0000;"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+            </div>
+            <div><div class="ch-label" style="font-size: 0.65rem;">YouTube</div><div class="ch-value" style="font-size: 0.85rem; margin-top: 0;">Veerapandi Tech</div></div>
+          </a>
+        </div>
+
+        <div style="padding:1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);font-size:0.85rem">
+          For detailed scoped requirements, enterprise deployment requests, or formal inquiries, please use the contact form on the right.
+        </div>
+      </div>
+
+      <div class="reveal">
+        <div class="section-label">Get In Touch</div>
+        <h1 style="margin-bottom: 0.75rem; font-size: clamp(2rem, 7vw, 3rem); line-height: 1.2;">Let's Launch<br><em style="font-style:normal;color:var(--accent)">Your Idea.</em></h1>
+        <p style="margin-top:0.5rem; margin-bottom: 2rem; max-width:480px; color: var(--muted); font-size: 0.95rem;">Ready to scale? Fill out the form below or pick a direct channel on the left. I reply within 24 hours — guaranteed.</p>
+
+        <div class="contact-form v-card" style="margin-top: 1rem;">
+          <h3 style="margin-bottom:1.5rem">Send a Message</h3>
+          <form id="contactForm" novalidate>
+            <div style="display:flex;flex-direction:column;gap:1rem">
+              <div class="form-row">
+                <div class="field"><label for="fname">Your Name</label><input id="fname" type="text" placeholder="Enter your name" required/></div>
+                <div class="field">
+                  <label for="femail">Email Address</label>
+                  <div style="position: relative; width: 100%;">
+                    <input id="femail" type="email" placeholder="you@example.com" required style="padding-right: 95px; width: 100%;" />
+                    <button type="button" class="btn btn-primary" id="getOtpBtn" style="position: absolute; top: 6px; bottom: 6px; right: 6px; padding: 0 1rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;">Get OTP</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field" id="otpGroup" style="display: none; margin-top: 0.5rem;">
+                <label for="fotp" style="color: var(--accent);">Verification Code</label>
+                <input id="fotp" type="text" placeholder="Enter 6-digit code sent to your email" maxlength="6" style="border-color: var(--accent); letter-spacing: 0.2em; font-family: var(--font-mono); font-size: 1.1rem; text-align: center;" />
+                <div id="otpSentMsg" style="color: #22c55e; font-size: 0.8rem; margin-top: 0.4rem; display: none;">✅ Verification code sent to your email!</div>
+              </div>
+
+              <div class="field"><label for="fservice">Service Needed</label>
+                <select id="fservice">
+                  <option value="">Select a service…</option>
+                  <option>Web Development</option>
+                  <option>Project Development</option>
+                  <option>Cybersecurity Services</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="field"><label for="fbudget">Budget Range</label>
+                <select id="fbudget">
+                  <option value="">Select budget…</option>
+                  <option>Under ₹500</option><option>₹500–₹2,000</option>
+                  <option>₹2,000–₹10,000</option><option>₹10,000+</option><option>Let's discuss</option>
+                </select>
+              </div>
+              <div class="field"><label for="fmsg">Project Details</label>
+                <textarea id="fmsg" placeholder="Tell me about your project, goal, and timeline…" required></textarea>
+              </div>
+
+              <div class="form-footer">
+                <span class="form-note">🔒 Your data stays private</span>
+                <button type="submit" class="btn btn-primary" id="submitBtn">Send Message →</button>
+              </div>
+              <div id="formSuccess">✅ Message sent! I'll reply within 24 hours.</div>
+            </div>
+          </form>
+        </div>
+      </div>
+  </div>
+</div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-top">
+    <div class="footer-brand"><a href="index.html" class="logo">V<em> Royals</em> Studio</a><p>Premium digital development and cybersecurity services.</p></div>
+    <div class="footer-links"><h5>Pages</h5><ul><li><a href="services.html">Services</a></li><li><a href="projects.html">Store</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><p>© <span id="footer-year">2025</span> V Royals Studio.</p><div class="social-row"><a href="#" class="social-btn">▶</a><a href="#" class="social-btn">📸</a><a href="#" class="social-btn">𝕏</a></div></div>
+</footer>
+<script src="js/shared.js"></script>
+<script>
+  let otpSignature = null;
+  let otpExpiration = null;
+
+  document.getElementById('getOtpBtn').addEventListener('click', async function() {
+      const name = document.getElementById('fname').value.trim();
+      const email = document.getElementById('femail').value.trim();
+      
+      if (!name || !email) { alert('Please fill in your name and email first.'); return; }
+      if (!/\S+@\S+\.\S+/.test(email)) { alert('Please enter a valid email address.'); return; }
+
+      const btn = document.getElementById('getOtpBtn');
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+
+      try {
+          const response = await fetch('/api/contact/send-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name, email: email })
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+              otpSignature = data.signature;
+              otpExpiration = data.expiration;
+              
+              document.getElementById('otpGroup').style.display = 'block';
+              document.getElementById('otpSentMsg').style.display = 'block';
+              document.getElementById('femail').readOnly = true; 
+              
+              btn.textContent = 'Sent ✅';
+              
+              if (data.dev_otp) {
+                  console.log("DEV MODE OTP:", data.dev_otp);
+              }
+          } else {
+              alert('❌ ' + (data.error || 'Failed to send verification code.'));
+              btn.textContent = 'Get OTP'; 
+              btn.disabled = false;
+          }
+      } catch (error) {
+          alert('❌ Network error. Please try again later.');
+          btn.textContent = 'Get OTP'; 
+          btn.disabled = false;
+      }
+  });
+
+  document.getElementById('contactForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const name = document.getElementById('fname').value.trim();
+    const email = document.getElementById('femail').value.trim();
+    const service = document.getElementById('fservice').value;
+    const budget = document.getElementById('fbudget').value;
+    const msg = document.getElementById('fmsg').value.trim();
+    const otp = document.getElementById('fotp') ? document.getElementById('fotp').value.trim() : '';
+
+    if (!name || !email || !msg) { alert('Please fill in name, email, and message.'); return; }
+    if (!/\S+@\S+\.\S+/.test(email)) { alert('Please enter a valid email address.'); return; }
+
+    // Check for links/URLs to prevent spam/abuse
+    const linkRegex = /https?:\/\/|www\.|[a-zA-Z0-9.-]+\.(com|net|org|co|info|io|xyz|biz|in|edu|gov)\b/i;
+    if (linkRegex.test(name) || linkRegex.test(msg)) {
+      alert('❌ Links or URLs are not allowed in the Name or Message fields.');
+      return;
+    }
+
+    if (!otpSignature) {
+        alert('Please click "Get OTP" to verify your email first.');
+        return;
+    }
+    
+    if (!otp || otp.length !== 6) {
+        alert('Please enter the 6-digit verification code.');
+        return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.textContent = 'Verifying & Sending…'; 
+    btn.disabled = true;
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          service: service,
+          budget: budget,
+          message: msg,
+          otp: otp,
+          signature: otpSignature,
+          expiration: otpExpiration
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        document.getElementById('formSuccess').style.display = 'block';
+        document.getElementById('formSuccess').textContent = '✅ Verified and message sent! I\'ll reply within 24 hours.';
+        document.getElementById('formSuccess').style.color = '#22c55e';
+        
+        this.reset();
+        otpSignature = null;
+        otpExpiration = null;
+        document.getElementById('otpGroup').style.display = 'none';
+        document.getElementById('otpSentMsg').style.display = 'none';
+        document.getElementById('femail').readOnly = false;
+        document.getElementById('getOtpBtn').textContent = 'Get OTP';
+        document.getElementById('getOtpBtn').disabled = false;
+        
+        setTimeout(() => document.getElementById('formSuccess').style.display = 'none', 6000);
+      } else {
+        document.getElementById('formSuccess').style.display = 'block';
+        document.getElementById('formSuccess').textContent = '❌ ' + (data.error || 'Verification failed.');
+        document.getElementById('formSuccess').style.color = '#ef4444';
+      }
+    } catch (error) {
+      document.getElementById('formSuccess').style.display = 'block';
+      document.getElementById('formSuccess').textContent = '❌ Network error. Please try again later.';
+      document.getElementById('formSuccess').style.color = '#ef4444';
+    } finally {
+      btn.textContent = 'Send Message →'; 
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

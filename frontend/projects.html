@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Project Store — V Royals Studio</title>
+  <link rel="icon" type="image/png" href="assets/images/favicon.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/vroyals_theme.css"/>
+  <script>
+    (function() {
+      try {
+        const u = sessionStorage.getItem('vroyals_user');
+        if (u && JSON.parse(u).logged_in) {
+          document.documentElement.classList.add('user-logged-in');
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+    .page-hero { padding: 140px 5% 60px; }
+    .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 5rem; }
+    .store-card { display: flex; flex-direction: column; height: 100%; }
+    .card-thumb { border-radius: var(--radius-sm); overflow: hidden; aspect-ratio: 16/9; margin-bottom: 1.5rem; background: var(--surface2); border: 1px solid var(--border); }
+    .card-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+    .store-card:hover .card-thumb img { transform: scale(1.05); }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+    @media (max-width: 600px) { .store-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<nav id="main-nav">
+  <a href="index.html" class="logo">V<em> Royals</em> Studio</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li>
+    <li><a href="youtube.html">YouTube</a></li>
+    <li><a href="projects.html">Store</a></li><li><a href="about.html">About</a></li>
+    <li class="nav-logged-out"><a href="login.html">Login</a></li>
+    <li class="nav-logged-in"><a href="my-reels.html" style="color:var(--accent); font-weight:600">Your Items</a></li>
+    <li class="nav-logged-in nav-profile">
+      <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); padding:0.4rem 0.8rem; border-radius:30px; border:1px solid var(--border); margin-left:0.5rem">
+        <span class="user-avatar-placeholder">👤</span>
+        <span class="user-name-placeholder" style="font-size:0.8rem; font-weight:600">User</span>
+        <a href="/api/logout" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" title="Logout" style="display:flex; align-items:center; margin-left:0.4rem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted); transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </a>
+      </div>
+    </li>
+    <li><a href="contact.html" class="btn btn-primary btn-sm">Hire Me</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+<script>
+  (function() {
+    try {
+      const u = sessionStorage.getItem('vroyals_user');
+      if (u) {
+        const user = JSON.parse(u);
+        if (user.logged_in) {
+          const firstName = (user.full_name || 'User').split(' ')[0];
+          document.querySelectorAll('.user-name-placeholder').forEach(el => {
+            el.textContent = firstName;
+          });
+          document.querySelectorAll('.user-avatar-placeholder').forEach(el => {
+            if (user.avatar) {
+              el.innerHTML = `<img src="${user.avatar}" style="width:20px; height:20px; border-radius:50%; display:block">`;
+            }
+          });
+        }
+      }
+    } catch(e) {}
+  })();
+</script>
+<div class="mobile-drawer" id="mobile-drawer">
+  <a href="index.html">Home</a><a href="services.html">Services</a>
+  <a href="youtube.html">YouTube</a><a href="projects.html">Store</a><a href="about.html">About</a>
+  <a href="login.html" class="nav-logged-out">Login</a>
+  <a href="my-reels.html" class="nav-logged-in" style="color:var(--accent); font-weight:600">Your Items</a>
+  <a href="/api/logout" class="nav-logged-in" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" style="color:var(--muted)">Logout 🚪</a>
+  <a href="contact.html" style="color:var(--accent)">Hire Me →</a>
+  <p class="mobile-drawer-footer">V Royals Studio © 2025</p>
+</div>
+
+<div class="page-hero">
+  <div class="section-label">Digital Products</div>
+  <h1 class="reveal">Premium Digital<br><em style="font-style:normal;color:var(--accent)">Vault.</em></h1>
+  <p class="section-desc reveal">Exclusive access to high-performance source code, designer templates, and studio-grade assets. Built for scale.</p>
+  
+  <!-- Search Bar -->
+  <div class="reveal" style="margin-top: 2rem; margin-bottom: 2rem; max-width: 500px; position: relative;">
+    <input type="text" id="storeSearch" placeholder="Search products, tech, or categories..." 
+           style="background:var(--surface); border:1px solid var(--border); border-radius:30px; padding:0.8rem 1.5rem 0.8rem 3rem; color:var(--text); font-size:0.95rem; width:100%; outline:none; transition:border-color 0.3s"/>
+    <span style="position:absolute; left:1.2rem; top:50%; transform:translateY(-50%); font-size:1.1rem; opacity:0.5">🔍</span>
+  </div>
+</div>
+
+<section>
+  <div class="store-grid" id="store-grid">
+    <!-- Skeleton Loaders -->
+    <div class="v-card store-card skeleton-card"></div>
+    <div class="v-card store-card skeleton-card"></div>
+    <div class="v-card store-card skeleton-card"></div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-top">
+    <div class="footer-brand"><a href="index.html" class="logo">V<em> Royals</em> Studio</a><p>Premium digital development and cybersecurity services.</p></div>
+    <div class="footer-links"><h5>Pages</h5><ul><li><a href="services.html">Services</a></li><li><a href="projects.html">Store</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><p>© <span id="footer-year">2025</span> V Royals Studio.</p><div class="social-row"><a href="#" class="social-btn">▶</a><a href="#" class="social-btn">📸</a><a href="#" class="social-btn">𝕏</a></div></div>
+</footer>
+<script src="js/shared.js"></script>
+<script>
+  let allProducts = [];
+
+  async function loadStore() {
+    try {
+      const response = await fetch('/api/store');
+      allProducts = await response.json();
+      renderProducts(allProducts);
+    } catch (e) {
+      console.error("Store load failed:", e);
+    }
+  }
+
+  function renderProducts(products) {
+    const grid = document.getElementById('store-grid');
+    grid.innerHTML = '';
+    
+    if (!products || products.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:4rem; color:var(--muted)">No products found matching your search.</div>';
+      return;
+    }
+
+    products.forEach(p => {
+      const techStack = p.tech_stack ? p.tech_stack.split(',') : [];
+      const techChips = techStack.map(tech => {
+        const t = tech.trim();
+        return `<span class="tag-chip" style="font-size:0.7rem; padding:0.18rem 0.6rem">${t}</span>`;
+      }).join('');
+
+      const card = document.createElement('div');
+      card.className = 'v-card store-card reveal visible'; // Make visible immediately for filter smoothness
+      card.innerHTML = `
+        <div class="card-thumb"><img src="${p.thumbnail}" alt="${p.title}" loading="lazy"/></div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <span class="badge badge-gold" style="margin-bottom:0.75rem">${p.category.toUpperCase()}</span>
+          ${p.discount_percent > 0 ? `<span class="badge badge-green">${p.discount_percent}% OFF</span>` : ''}
+        </div>
+        <h4>${p.title}</h4>
+        <div class="v-tech" style="margin-bottom:1.25rem; display:flex; gap:0.4rem; flex-wrap:wrap;">${techChips}</div>
+        <div class="card-footer">
+          <div class="price-display">
+            <span class="price-tag" style="font-size:1.1rem">₹${p.sale_price}</span>
+            ${p.sale_price < p.original_price ? `<span style="text-decoration:line-through; font-size:0.75rem; color:var(--muted); margin-left:0.5rem">₹${p.original_price}</span>` : ''}
+          </div>
+          <a href="project-details.html?id=${p.id}" class="btn btn-primary btn-sm">View Details</a>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  // Search Logic
+  document.getElementById('storeSearch').addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase();
+    const filtered = allProducts.filter(p => 
+      p.title.toLowerCase().includes(query) || 
+      p.description.toLowerCase().includes(query) ||
+      (p.tech_stack && p.tech_stack.toLowerCase().includes(query)) ||
+      p.category.toLowerCase().includes(query)
+    );
+    renderProducts(filtered);
+  });
+
+  window.addEventListener('DOMContentLoaded', loadStore);
+</script>
+</body>
+</html>

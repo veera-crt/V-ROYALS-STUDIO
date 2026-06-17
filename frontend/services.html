@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="V Royals Studio Services — Professional Web Development, Project Development, and Cybersecurity."/>
+  <title>Services — V Royals Studio</title>
+  <link rel="icon" type="image/png" href="assets/images/favicon.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/vroyals_theme.css"/>
+  <script>
+    (function() {
+      try {
+        const u = sessionStorage.getItem('vroyals_user');
+        if (u && JSON.parse(u).logged_in) {
+          document.documentElement.classList.add('user-logged-in');
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+    .page-hero { padding: 140px 5% 60px; }
+    .service-block { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; padding: 80px 5%; border-top: 1px solid var(--border); }
+    .service-block:nth-child(even) .sb-visual { order: 2; }
+    .service-block:nth-child(even) .sb-info   { order: 1; }
+    .sb-visual { border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 4/3; border: 1px solid var(--border); }
+    .sb-visual img { width: 100%; height: 100%; object-fit: cover; }
+    .sb-features { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; margin: 1.75rem 0; }
+    .sb-features li { display: flex; align-items: flex-start; gap: 0.75rem; font-size: 0.9rem; color: var(--muted); }
+    .sb-features li::before { content: '✓'; color: var(--accent); font-weight: 700; flex-shrink: 0; margin-top: 0.05rem; }
+    .pricing-row { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1.5rem 0; }
+    .price-pill { background: rgba(245,197,24,0.08); border: 1px solid rgba(245,197,24,0.2); border-radius: 100px; padding: 0.5rem 1.25rem; }
+    .price-pill .pp-name { font-size: 0.7rem; color: var(--muted); display: block; text-transform: uppercase; letter-spacing: 0.1em; }
+    .price-pill .pp-val  { font-family: 'JetBrains Mono'; font-size: 1.1rem; color: var(--accent); font-weight: 700; }
+    @media (max-width: 900px) {
+      .service-block { grid-template-columns: 1fr; gap: 2.5rem; }
+      .service-block:nth-child(even) .sb-visual { order: 0; }
+      .service-block:nth-child(even) .sb-info   { order: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <a href="index.html" class="logo">V<em> Royals</em> Studio</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="services.html">Services</a></li>
+    <li><a href="youtube.html">YouTube</a></li>
+    <li><a href="projects.html">Store</a></li>
+    <li><a href="about.html">About</a></li>
+    <li class="nav-logged-out"><a href="login.html">Login</a></li>
+    <li class="nav-logged-in"><a href="my-reels.html" style="color:var(--accent); font-weight:600">Your Items</a></li>
+    <li class="nav-logged-in nav-profile">
+      <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); padding:0.4rem 0.8rem; border-radius:30px; border:1px solid var(--border); margin-left:0.5rem">
+        <span class="user-avatar-placeholder">👤</span>
+        <span class="user-name-placeholder" style="font-size:0.8rem; font-weight:600">User</span>
+        <a href="/api/logout" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" title="Logout" style="display:flex; align-items:center; margin-left:0.4rem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted); transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </a>
+      </div>
+    </li>
+    <li><a href="contact.html" class="btn btn-primary btn-sm">Hire Me</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+<script>
+  (function() {
+    try {
+      const u = sessionStorage.getItem('vroyals_user');
+      if (u) {
+        const user = JSON.parse(u);
+        if (user.logged_in) {
+          const firstName = (user.full_name || 'User').split(' ')[0];
+          document.querySelectorAll('.user-name-placeholder').forEach(el => {
+            el.textContent = firstName;
+          });
+          document.querySelectorAll('.user-avatar-placeholder').forEach(el => {
+            if (user.avatar) {
+              el.innerHTML = `<img src="${user.avatar}" style="width:20px; height:20px; border-radius:50%; display:block">`;
+            }
+          });
+        }
+      }
+    } catch(e) {}
+  })();
+</script>
+<div class="mobile-drawer" id="mobile-drawer">
+  <a href="index.html">Home</a><a href="services.html">Services</a>
+  <a href="youtube.html">YouTube</a><a href="projects.html">Store</a><a href="about.html">About</a>
+  <a href="login.html" class="nav-logged-out">Login</a>
+  <a href="my-reels.html" class="nav-logged-in" style="color:var(--accent); font-weight:600">Your Items</a>
+  <a href="/api/logout" class="nav-logged-in" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" style="color:var(--muted)">Logout 🚪</a>
+  <a href="contact.html" style="color:var(--accent)">Hire Me →</a>
+  <p class="mobile-drawer-footer">V Royals Studio © 2025</p>
+</div>
+
+<div class="page-hero">
+  <div class="section-label">Offerings</div>
+  <h1 class="reveal">Premium<br><em style="font-style:normal;color:var(--accent)">Services</em></h1>
+  <p class="section-desc reveal">Top-tier digital development and security. Pick a package or request a custom quote within 24 hours.</p>
+</div>
+
+<!-- CYBERSECURITY -->
+<div class="service-block" id="video">
+  <div class="sb-visual reveal"><img src="assets/images/service_cybersecurity.png" alt="Cybersecurity Services"/></div>
+  <div class="sb-info reveal">
+    <div class="section-label">Service 01</div>
+    <h2>Cybersecurity Services</h2>
+    <p style="margin-top:0.75rem">Comprehensive security auditing, vulnerability testing, and bug fixing to protect your web assets. Rest easy with a perfect report.</p>
+    <ul class="sb-features">
+      <li>Website penetration testing &amp; scan analysis</li>
+      <li>Security bug fixing &amp; vulnerability patching</li>
+      <li>OWASP Top 10 compliance checklist checks</li>
+      <li>Detailed, actionable audit &amp; security reports</li>
+      <li>Secure API implementation &amp; SSL configurations</li>
+    </ul>
+    <div class="pricing-row" id="pricing-cybersecurity">
+      <div class="price-pill"><span class="pp-name">Vulnerability Testing</span><span class="pp-val">₹1,499</span></div>
+      <div class="price-pill"><span class="pp-name">Bug Fixing & Reports</span><span class="pp-val">₹2,999</span></div>
+      <div class="price-pill"><span class="pp-name">Full Pentesting Report</span><span class="pp-val">₹9,999</span></div>
+    </div>
+    <a href="contact.html" class="btn btn-primary">Secure My Site</a>
+  </div>
+</div>
+
+<!-- WEB -->
+<div class="service-block" id="web">
+  <div class="sb-visual reveal"><img src="assets/images/service_web.png" alt="Web Development"/></div>
+  <div class="sb-info reveal">
+    <div class="section-label">Service 02</div>
+    <h2>Web Development</h2>
+    <p style="margin-top:0.75rem">Lightning-fast, revenue-generating platforms. From MVPs to full-scale SaaS products.</p>
+    <ul class="sb-features">
+      <li>Next.js, React, Node.js, PostgreSQL</li>
+      <li>Custom REST &amp; GraphQL APIs</li>
+      <li>Authentication, payment, &amp; admin systems</li>
+      <li>SEO optimised &amp; performance-first</li>
+      <li>Clean code with full documentation</li>
+    </ul>
+    <div class="pricing-row" id="pricing-web">
+      <div class="price-pill"><span class="pp-name">Web Development</span><span class="pp-val">₹9,999</span></div>
+      <div class="price-pill"><span class="pp-name">SaaS Platform</span><span class="pp-val">Custom</span></div>
+    </div>
+    <a href="contact.html" class="btn btn-primary">Let's Build</a>
+  </div>
+</div>
+
+<!-- PROJECT DEVELOPMENT -->
+<div class="service-block" id="design">
+  <div class="sb-visual reveal"><img src="assets/images/service_project_dev.png" alt="Project Development"/></div>
+  <div class="sb-info reveal">
+    <div class="section-label">Service 03</div>
+    <h2>Project Development</h2>
+    <p style="margin-top:0.75rem">End-to-end custom system design and execution. From scoping architectural requirements to deployment.</p>
+    <ul class="sb-features">
+      <li>System requirements engineering &amp; database design</li>
+      <li>Custom backend business logic &amp; API services</li>
+      <li>Legacy application scaling &amp; updates</li>
+      <li>Deployment automation &amp; DevOps setup</li>
+      <li>Full developer-ready handoff &amp; technical reports</li>
+    </ul>
+    <div class="pricing-row" id="pricing-project">
+      <div class="price-pill"><span class="pp-name">Project Development</span><span class="pp-val">₹24,999</span></div>
+      <div class="price-pill"><span class="pp-name">Enterprise Build</span><span class="pp-val">Custom</span></div>
+    </div>
+    <a href="contact.html" class="btn btn-primary">Start Scoping</a>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-top">
+    <div class="footer-brand"><a href="index.html" class="logo">V<em> Royals</em> Studio</a><p>Premium digital development and cybersecurity services.</p></div>
+    <div class="footer-links"><h5>Pages</h5><ul><li><a href="services.html">Services</a></li><li><a href="projects.html">Store</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><p>© <span id="footer-year">2025</span> V Royals Studio.</p><div class="social-row"><a href="#" class="social-btn">▶</a><a href="#" class="social-btn">📸</a><a href="#" class="social-btn">𝕏</a></div></div>
+</footer>
+<script src="js/shared.js"></script>
+<script>
+  // ── DYNAMIC PRICING LOADING ──
+  async function loadPricing() {
+    try {
+      const response = await fetch('/api/pricing?_t=' + Date.now(), { cache: 'no-store' });
+      const pricing = await response.json();
+      
+      if (pricing.error) {
+        console.error("Pricing API Error:", pricing.error);
+        return;
+      }
+
+      const rowCyber = document.getElementById('pricing-cybersecurity');
+      const rowWeb = document.getElementById('pricing-web');
+      const rowProject = document.getElementById('pricing-project');
+      
+      if (rowCyber) rowCyber.innerHTML = '';
+      if (rowWeb) rowWeb.innerHTML = '';
+      if (rowProject) rowProject.innerHTML = '';
+
+      pricing.forEach(p => {
+        const cat = (p.category || '').toLowerCase().trim();
+        let container = null;
+        if (cat === 'cybersecurity') {
+          container = rowCyber;
+        } else if (cat === 'web') {
+          container = rowWeb;
+        } else if (cat === 'project') {
+          container = rowProject;
+        }
+        
+        if (!container) return;
+
+        let priceHtml = '';
+        if (p.discount_percent > 0) {
+          priceHtml = `
+            <span style="text-decoration: line-through; color: #a0a0a0; margin-right: 0.6rem; font-size: 0.9em;">₹${p.original_price}</span>
+            <span style="color: var(--accent); font-weight: 700;">₹${p.discounted_price}</span>
+            <span style="color: #22c55e; font-size: 0.75rem; font-weight: 800; margin-left: 0.6rem; background: rgba(34,197,94,0.1); padding: 0.2rem 0.5rem; border-radius: 4px; display: inline-block;">${Math.round(p.discount_percent)}% OFF</span>
+          `;
+        } else {
+          priceHtml = `₹${p.original_price}`;
+        }
+
+        const pill = document.createElement('div');
+        pill.className = 'price-pill';
+        pill.innerHTML = `
+          <span class="pp-name">${p.service}</span>
+          <span class="pp-val">${priceHtml}</span>
+        `;
+        container.appendChild(pill);
+      });
+
+      // Maintain fallback custom items if not configured in database
+      if (rowWeb && !pricing.some(p => p.category === 'web' && p.service.toLowerCase().includes('saas'))) {
+        rowWeb.innerHTML += `<div class="price-pill"><span class="pp-name">SaaS Platform</span><span class="pp-val">Custom</span></div>`;
+      }
+      if (rowProject && !pricing.some(p => p.category === 'project' && p.service.toLowerCase().includes('enterprise'))) {
+        rowProject.innerHTML += `<div class="price-pill"><span class="pp-name">Enterprise Build</span><span class="pp-val">Custom</span></div>`;
+      }
+    } catch (err) {
+      console.error("Failed to load pricing:", err);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', loadPricing);
+</script>
+</body>
+</html>

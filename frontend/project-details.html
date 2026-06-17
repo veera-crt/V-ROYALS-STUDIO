@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title id="page-title">Project Details — V Royals Studio</title>
+  <link rel="icon" type="image/png" href="assets/images/favicon.png"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/vroyals_theme.css"/>
+  <script>
+    (function() {
+      try {
+        const u = sessionStorage.getItem('vroyals_user');
+        if (u && JSON.parse(u).logged_in) {
+          document.documentElement.classList.add('user-logged-in');
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+    .details-layout { display: grid; grid-template-columns: 1fr 380px; gap: 4rem; align-items: start; margin-top: 3rem; }
+    .d-media { border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 16/9; border: 1px solid var(--border); margin-bottom: 2.5rem; background: var(--surface2); }
+    .d-media img { width: 100%; height: 100%; object-fit: cover; }
+    .feature-list { list-style: none; display: flex; flex-direction: column; gap: 0.9rem; margin: 2rem 0; }
+    .feature-list li { display: flex; align-items: flex-start; gap: 0.85rem; color: var(--muted); font-size: 0.925rem; }
+    .feature-list li .fi { color: var(--accent); flex-shrink: 0; font-size: 0.9rem; margin-top: 0.15rem; }
+    .tech-tags { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1rem; }
+    .buy-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; position: sticky; top: 100px; }
+    .buy-price { font-family: var(--font-mono); font-size: 2.5rem; font-weight: 700; display: block; margin-bottom: 1.5rem; color: var(--text); }
+    .buy-includes { list-style: none; font-size: 0.85rem; color: var(--muted); display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1.5rem; }
+    .buy-includes li::before { content: '✓ '; color: var(--accent); }
+    .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+    .guarantee { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 1rem; }
+    
+    #details-content {
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+    #details-content.loaded {
+      opacity: 1;
+    }
+    
+    @media (max-width: 900px) { .details-layout { grid-template-columns: 1fr; } .buy-box { position: static; } }
+  </style>
+</head>
+<body>
+<nav id="main-nav">
+  <a href="index.html" class="logo">V<em> Royals</em> Studio</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li>
+    <li><a href="youtube.html">YouTube</a></li>
+    <li><a href="projects.html">Store</a></li><li><a href="about.html">About</a></li>
+    <li class="nav-logged-out"><a href="login.html">Login</a></li>
+    <li class="nav-logged-in"><a href="my-reels.html" style="color:var(--accent); font-weight:600">Your Items</a></li>
+    <li class="nav-logged-in nav-profile">
+      <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); padding:0.4rem 0.8rem; border-radius:30px; border:1px solid var(--border); margin-left:0.5rem">
+        <span class="user-avatar-placeholder">👤</span>
+        <span class="user-name-placeholder" style="font-size:0.8rem; font-weight:600">User</span>
+        <a href="/api/logout" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" title="Logout" style="display:flex; align-items:center; margin-left:0.4rem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted); transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </a>
+      </div>
+    </li>
+    <li><a href="contact.html" class="btn btn-primary btn-sm">Hire Me</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+<script>
+  (function() {
+    try {
+      const u = sessionStorage.getItem('vroyals_user');
+      if (u) {
+        const user = JSON.parse(u);
+        if (user.logged_in) {
+          const firstName = (user.full_name || 'User').split(' ')[0];
+          document.querySelectorAll('.user-name-placeholder').forEach(el => {
+            el.textContent = firstName;
+          });
+          document.querySelectorAll('.user-avatar-placeholder').forEach(el => {
+            if (user.avatar) {
+              el.innerHTML = `<img src="${user.avatar}" style="width:20px; height:20px; border-radius:50%; display:block">`;
+            }
+          });
+        }
+      }
+    } catch(e) {}
+  })();
+</script>
+<div class="mobile-drawer" id="mobile-drawer">
+  <a href="index.html">Home</a><a href="services.html">Services</a>
+  <a href="youtube.html">YouTube</a><a href="projects.html">Store</a><a href="about.html">About</a>
+  <a href="login.html" class="nav-logged-out">Login</a>
+  <a href="my-reels.html" class="nav-logged-in" style="color:var(--accent); font-weight:600">Your Items</a>
+  <a href="/api/logout" class="nav-logged-in" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" style="color:var(--muted)">Logout 🚪</a>
+  <a href="contact.html" style="color:var(--accent)">Hire Me →</a>
+  <p class="mobile-drawer-footer">V Royals Studio © 2025</p>
+</div>
+
+<section style="min-height: 80vh;">
+  <a href="projects.html" style="display:inline-flex;align-items:center;gap:0.5rem;color:var(--muted);font-size:0.875rem;margin-bottom:2rem">← Back to Store</a>
+  
+  <div id="details-content" style="display: none;">
+    <div class="section-label" id="product-category">Digital Asset</div>
+    <h1 class="reveal" id="product-title">Loading...</h1>
+
+    <div class="details-layout">
+      <div>
+        <div class="d-media reveal">
+          <img id="product-thumbnail" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Product Thumbnail" />
+        </div>
+        
+        <div class="reveal" style="margin-bottom:2.5rem">
+          <h2 style="font-size:2rem">Description</h2>
+          <p id="product-desc" style="color: var(--muted); font-size: 1.05rem; line-height: 1.8; white-space: pre-line;"></p>
+        </div>
+
+        <div class="reveal">
+          <h2 style="font-size:2rem">Included Deliverables</h2>
+          <ul class="feature-list">
+            <li><span class="fi">★</span>Complete Clean Commented Source Code</li>
+            <li><span class="fi">★</span>Detailed setup guide with installation steps</li>
+            <li><span class="fi">★</span>Lifetime access & future code updates</li>
+            <li><span class="fi">★</span>Direct developer chat support & community channels</li>
+            <li><span class="fi">★</span>Commercial use licence permitted</li>
+          </ul>
+        </div>
+        
+        <div class="reveal" style="margin-top:2.5rem">
+          <h2 style="font-size:2rem">Tech Stack</h2>
+          <div class="tech-tags" id="product-tech-tags">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <aside class="buy-box reveal">
+        <span class="badge badge-gold" style="margin-bottom:1rem">Vault Access</span>
+        <div class="price-display" style="margin-bottom: 1.5rem;">
+          <span class="buy-price" id="product-price">₹0</span>
+          <span id="product-original-price" style="text-decoration:line-through; font-size:0.9rem; color:var(--muted); display:none">₹0</span>
+        </div>
+        <a id="buy-btn" href="#" class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:0.75rem">Get Access Now 🔒</a>
+        <a id="ask-btn" href="#" class="btn btn-ghost" style="width:100%;justify-content:center">Ask a Question</a>
+        <p class="guarantee">Instant delivery · 100% secure · Support included</p>
+        <div class="divider"></div>
+        <ul class="buy-includes">
+          <li>Full commented source code</li>
+          <li>Step-by-step setup guide</li>
+          <li>Lifetime updates</li>
+          <li>Support via Email</li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+
+  <div id="loading-spinner" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 50vh; text-align: center; padding: 4rem 2rem;">
+    <div style="display:inline-block; width:50px; height:50px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 1s linear infinite;"></div>
+    <p style="margin-top:1.5rem; color:var(--muted)">Fetching project details...</p>
+  </div>
+</section>
+
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+<footer class="site-footer">
+  <div class="footer-top">
+    <div class="footer-brand"><a href="index.html" class="logo">V<em> Royals</em> Studio</a><p>Premium digital development and cybersecurity services.</p></div>
+    <div class="footer-links"><h5>Pages</h5><ul><li><a href="services.html">Services</a></li><li><a href="projects.html">Store</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><p>© <span id="footer-year">2026</span> V Royals Studio.</p></div>
+</footer>
+
+<script src="js/shared.js"></script>
+<script>
+  async function loadDetails() {
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
+    
+    if (!productId) {
+      window.location.href = 'projects.html';
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/store/${productId}`);
+      if (!response.ok) throw new Error("Product not found");
+      const p = await response.json();
+      
+      // Update page metadata
+      document.title = `${p.title} — V Royals Studio`;
+      document.getElementById('page-title').textContent = `${p.title} — V Royals Studio`;
+      
+      // Update main text
+      document.getElementById('product-category').textContent = p.category.toUpperCase();
+      document.getElementById('product-title').innerHTML = `${p.title}<br><em style="font-style:normal;color:var(--accent)">Source Code</em>`;
+      document.getElementById('product-desc').textContent = p.description;
+      
+      // Update thumbnail image
+      const thumbnailEl = document.getElementById('product-thumbnail');
+      thumbnailEl.src = p.thumbnail || 'https://images.unsplash.com/photo-1551288049-bbbda5366fd9?auto=format&fit=crop&q=80&w=1200';
+      thumbnailEl.alt = p.title;
+      
+      // Update Price display
+      document.getElementById('product-price').textContent = `₹${p.sale_price}`;
+      const originalPriceEl = document.getElementById('product-original-price');
+      if (p.sale_price < p.original_price) {
+        originalPriceEl.textContent = `₹${p.original_price}`;
+        originalPriceEl.style.display = 'inline-block';
+      } else {
+        originalPriceEl.style.display = 'none';
+      }
+      
+      // Update Buttons
+      document.getElementById('buy-btn').href = `contact.html?product=${encodeURIComponent(p.title)}`;
+      document.getElementById('ask-btn').href = `contact.html?product=${encodeURIComponent(p.title)}&ask=1`;
+      
+      // Render Tech Stack chips
+      const techContainer = document.getElementById('product-tech-tags');
+      techContainer.innerHTML = '';
+      if (p.tech_stack) {
+        const tags = p.tech_stack.split(',');
+        tags.forEach(t => {
+          const chip = document.createElement('span');
+          chip.className = 'tag-chip';
+          chip.textContent = t.trim();
+          techContainer.appendChild(chip);
+        });
+      } else {
+        techContainer.innerHTML = '<span style="color:var(--muted)">Not specified</span>';
+      }
+      
+      // Hide spinner, show content
+      document.getElementById('loading-spinner').style.display = 'none';
+      const detailsContent = document.getElementById('details-content');
+      detailsContent.style.display = 'block';
+      setTimeout(() => {
+        detailsContent.classList.add('loaded');
+      }, 50);
+
+    } catch (e) {
+      console.error(e);
+      document.getElementById('details-content').style.display = 'none';
+      const spinner = document.getElementById('loading-spinner');
+      spinner.style.display = 'flex';
+      spinner.innerHTML = `
+        <div style="font-size:3rem; margin-bottom:1rem">⚠️</div>
+        <h3>Failed to load product details</h3>
+        <p style="color:var(--muted); margin-top:0.5rem">The product may have been removed or does not exist.</p>
+        <a href="projects.html" class="btn btn-primary btn-sm" style="margin-top:1.5rem">Back to Store</a>
+      `;
+    }
+  }
+  
+  window.addEventListener('DOMContentLoaded', loadDetails);
+</script>
+</body>
+</html>

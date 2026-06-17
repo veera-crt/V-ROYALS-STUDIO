@@ -1,0 +1,10 @@
+flask
+psycopg2-binary==2.9.12
+python-dotenv
+requests
+google-auth
+google-auth-oauthlib
+flask-login
+werkzeug
+gunicorn
+urllib3<2

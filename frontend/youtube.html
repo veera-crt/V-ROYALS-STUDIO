@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YouTube — V Royals Studio</title>
+  <link rel="icon" type="image/png" href="assets/images/favicon.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/vroyals_theme.css"/>
+  <script>
+    (function() {
+      try {
+        const u = sessionStorage.getItem('vroyals_user');
+        if (u && JSON.parse(u).logged_in) {
+          document.documentElement.classList.add('user-logged-in');
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+    .yt-hero { padding: 140px 5% 60px; display: flex; align-items: center; gap: 5rem; flex-wrap: wrap; }
+    .yt-hero-info { flex: 1; min-width: 280px; }
+    .yt-hero-img  { flex: 1; min-width: 280px; border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 16/9; background: var(--surface); border: 1px solid var(--border); }
+    .yt-hero-img iframe { width: 100%; height: 100%; border: none; display: block; }
+    .channel-meta { display: flex; align-items: center; gap: 1.25rem; margin: 2rem 0; }
+    .channel-avatar { width: 72px; height: 72px; border-radius: 50%; border: 3px solid var(--accent); overflow: hidden; flex-shrink: 0; }
+    .channel-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .channel-name { font-family: 'Syne'; font-size: 1.2rem; font-weight: 800; }
+    .channel-sub  { font-size: 0.8rem; color: var(--muted); }
+    .yt-stats-bar { display: flex; gap: 2.5rem; padding: 2rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin: 2rem 0; flex-wrap: wrap; gap: 2rem; }
+    .yt-stat-num  { font-family: 'Syne'; font-size: 2.2rem; font-weight: 800; color: var(--accent); display: block; }
+    .yt-stat-lbl  { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .videos-grid  { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
+    .vid-card { border-radius: var(--radius-md); overflow: hidden; background: var(--surface); border: 1px solid var(--border); transition: var(--transition); }
+    .vid-card { border-radius: var(--radius-md); overflow: hidden; background: var(--surface); border: 1px solid var(--border); transition: var(--transition); }
+    .vid-thumb { aspect-ratio: 16/9; position: relative; overflow: hidden; background: #000; }
+    .vid-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+    .vid-info { padding: 1.25rem; }
+
+    .vid-title { font-family: 'Outfit'; font-weight: 700; font-size: 0.95rem; margin-bottom: 0.35rem; }
+    .vid-meta { font-size: 0.75rem; color: var(--muted); }
+    .search-container { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; background: var(--surface2); padding: 0.5rem 1.5rem; border-radius: 100px; border: 1px solid var(--border); max-width: 500px; }
+    .search-input { background: transparent; border: none; color: var(--text); padding: 0.75rem 0; width: 100%; outline: none; font-family: var(--font-body); }
+    .search-icon { color: var(--muted); font-size: 1.2rem; }
+    .load-more-container { display: flex; justify-content: center; margin-top: 4rem; margin-bottom: 4rem; }
+    @media (max-width: 768px) { .yt-hero { flex-direction: column; gap: 2.5rem; } }
+  </style>
+</head>
+<body>
+<nav id="main-nav">
+  <a href="index.html" class="logo">V<em> Royals</em> Studio</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li><li><a href="services.html">Services</a></li>
+    <li><a href="youtube.html">YouTube</a></li>
+    <li><a href="projects.html">Store</a></li><li><a href="about.html">About</a></li>
+    <li class="nav-logged-out"><a href="login.html">Login</a></li>
+    <li class="nav-logged-in"><a href="my-reels.html" style="color:var(--accent); font-weight:600">Your Items</a></li>
+    <li class="nav-logged-in nav-profile">
+      <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); padding:0.4rem 0.8rem; border-radius:30px; border:1px solid var(--border); margin-left:0.5rem">
+        <span class="user-avatar-placeholder">👤</span>
+        <span class="user-name-placeholder" style="font-size:0.8rem; font-weight:600">User</span>
+        <a href="/api/logout" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" title="Logout" style="display:flex; align-items:center; margin-left:0.4rem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted); transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </a>
+      </div>
+    </li>
+    <li><a href="contact.html" class="btn btn-primary btn-sm">Hire Me</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+<script>
+  (function() {
+    try {
+      const u = sessionStorage.getItem('vroyals_user');
+      if (u) {
+        const user = JSON.parse(u);
+        if (user.logged_in) {
+          const firstName = (user.full_name || 'User').split(' ')[0];
+          document.querySelectorAll('.user-name-placeholder').forEach(el => {
+            el.textContent = firstName;
+          });
+          document.querySelectorAll('.user-avatar-placeholder').forEach(el => {
+            if (user.avatar) {
+              el.innerHTML = `<img src="${user.avatar}" style="width:20px; height:20px; border-radius:50%; display:block">`;
+            }
+          });
+        }
+      }
+    } catch(e) {}
+  })();
+</script>
+<div class="mobile-drawer" id="mobile-drawer">
+  <a href="index.html">Home</a><a href="services.html">Services</a>
+  <a href="youtube.html">YouTube</a><a href="projects.html">Store</a><a href="about.html">About</a>
+  <a href="login.html" class="nav-logged-out">Login</a>
+  <a href="my-reels.html" class="nav-logged-in" style="color:var(--accent); font-weight:600">Your Items</a>
+  <a href="/api/logout" class="nav-logged-in" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" style="color:var(--muted)">Logout 🚪</a>
+  <a href="contact.html" style="color:var(--accent)">Hire Me →</a>
+  <p class="mobile-drawer-footer">V Royals Studio © 2025</p>
+</div>
+
+<div class="yt-hero">
+  <div class="yt-hero-info reveal">
+    <div class="section-label">Official Channel</div>
+    <h1>Build. Create.<br><em style="font-style:normal;color:var(--accent)">Scale.</em></h1>
+    <div class="channel-meta">
+      <div class="channel-avatar">
+        <img src="https://yt3.googleusercontent.com/p-4TfH3RrTVACrSs1oYChNFJQbeb3F39tYdJGPZEZYV2GFCa5viRB2RnM6qJjf1QStCrU6_o=s160-c-k-c0x00ffffff-no-rj" alt="Veerapandi Tech Official Logo" loading="lazy"/>
+      </div>
+      <div>
+        <div class="channel-name">Veerapandi Tech</div>
+        <div class="channel-sub">Digital Forensics · Incident Response · Tech Tutorials</div>
+      </div>
+    </div>
+    <p style="max-width:440px">Sharing the behind-the-scenes of building a development and cybersecurity agency. Tutorials, security research, and developer insights — every week.</p>
+    <div class="yt-stats-bar">
+      <div><span class="yt-stat-num" id="yt-subs-page">1.19K+</span><span class="yt-stat-lbl">Subscribers</span></div>
+      <div><span class="yt-stat-num" id="yt-views-page">396.1K+</span><span class="yt-stat-lbl">Total Views</span></div>
+      <div><span class="yt-stat-num">50+</span><span class="yt-stat-lbl">Videos</span></div>
+    </div>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap">
+      <a href="https://www.youtube.com/channel/UCPUS-XlXHCF4PntvyV-WVKg" target="_blank" class="btn btn-primary" style="background: #ff0000; box-shadow: 0 8px 24px rgba(255,0,0,0.25);">▶ Subscribe Free</a>
+    </div>
+  </div>
+  <div class="yt-hero-img reveal"><iframe src="https://www.youtube.com/embed/videoseries?list=UUPUS-XlXHCF4PntvyV-WVKg" allowfullscreen loading="lazy"></iframe></div>
+</div>
+
+<section>
+  <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <div class="section-label">Latest Uploads</div>
+      <h2>Recent Videos</h2>
+    </div>
+    <div class="search-container">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="yt-search" class="search-input" placeholder="Search videos..."/>
+    </div>
+  </div>
+  <div class="videos-grid" id="yt-grid">
+    <div class="v-card reveal"><div class="vid-thumb"><iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" loading="lazy" allowfullscreen></iframe></div>
+      <div class="vid-info"><div class="vid-title">Securing Node.js APIs in 2026</div><div class="vid-meta">1 day ago · 12K views</div></div></div>
+    <div class="v-card reveal"><div class="vid-thumb"><iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" loading="lazy" allowfullscreen></iframe></div>
+      <div class="vid-info"><div class="vid-title">Day in the Life — Developer & Creator</div><div class="vid-meta">3 days ago · 8.5K views</div></div></div>
+    <div class="v-card reveal"><div class="vid-thumb"><iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" loading="lazy" allowfullscreen></iframe></div>
+      <div class="vid-info"><div class="vid-title">OWASP Top 10 Vulnerabilities Explained</div><div class="vid-meta">1 week ago · 25K views</div></div></div>
+  </div>
+  <div class="load-more-container" id="load-more-wrap">
+    <button id="load-more-btn" class="btn btn-ghost">Load More Videos ↓</button>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-top">
+    <div class="footer-brand"><a href="index.html" class="logo">V<em> Royals</em> Studio</a><p>Premium digital development and cybersecurity services.</p></div>
+    <div class="footer-links"><h5>Pages</h5><ul><li><a href="services.html">Services</a></li><li><a href="projects.html">Store</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><p>© <span id="footer-year">2025</span> V Royals Studio.</p><div class="social-row"><a href="#" class="social-btn">▶</a><a href="#" class="social-btn">📸</a><a href="#" class="social-btn">𝕏</a></div></div>
+</footer>
+<script src="js/shared.js"></script>
+</body>
+</html>

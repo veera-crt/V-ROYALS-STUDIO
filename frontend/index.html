@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="V Royals Studio — Premium Web Development, Project Development & Cybersecurity services. Build your brand with royal precision."/>
+  <title>V Royals Studio — Premium Development & Cybersecurity Platform</title>
+  <link rel="icon" type="image/png" href="assets/images/favicon.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/vroyals_theme.css"/>
+  <script>
+    (function() {
+      try {
+        const u = sessionStorage.getItem('vroyals_user');
+        if (u && JSON.parse(u).logged_in) {
+          document.documentElement.classList.add('user-logged-in');
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <style>
+    /* ── HOME PAGE SPECIFIC ── */
+    .hero {
+      min-height: 100svh;
+      display: flex; flex-direction: column; justify-content: center;
+      padding-top: 140px;
+      background: 
+        linear-gradient(to right, rgba(5,5,8,0.95) 20%, rgba(5,5,8,0.7) 50%, rgba(5,5,8,0.1) 100%),
+        url('assets/images/hero_bg.png') center/cover no-repeat;
+      position: relative;
+    }
+    .hero-inner { max-width: 860px; }
+    .hero-eyebrow { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+    .hero-eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+    .hero-eyebrow span { font-size: 0.8rem; color: var(--muted); }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+
+    .hero h1 { margin-bottom: 1.75rem; }
+    .hero h1 .line-accent { color: var(--accent); }
+    .hero-action-row { display: flex; align-items: flex-end; gap: 8rem; margin-top: 2.5rem; }
+    .hero-desc { font-size: 1.15rem; max-width: 520px; margin-bottom: 0; }
+    .hero-ctas { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0; }
+    .hero-stats { display: flex; gap: 3.5rem; padding-top: 0; border-top: none; max-width: none; border-left: 1px solid var(--border); padding-left: 5rem; }
+    .stat-num  { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--text); display: block; line-height: 1; margin-bottom: 0.25rem; }
+    .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+
+    /* ── SERVICES SECTION ── */
+    .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    .svc-icon { width: 54px; height: 54px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 1.5rem; }
+    .svc-icon-video  { background: rgba(255,107,44,0.12); }
+    .svc-icon-web    { background: rgba(245,197,24,0.12); }
+    .svc-icon-design { background: rgba(99,102,241,0.12); }
+    .svc-link { color: var(--accent); font-size: 0.875rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 1.5rem; transition: gap 0.2s; }
+    .svc-link:hover { gap: 0.75rem; }
+    /* ── YOUTUBE SECTION ── */
+    .yt-section { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+    .yt-embed { border-radius: var(--radius-md); overflow: hidden; aspect-ratio: 16/9; border: 1px solid var(--border); }
+    .yt-embed iframe { width: 100%; height: 100%; border: none; display: block; }
+    .yt-stats { display: flex; gap: 2.5rem; margin: 2rem 0; }
+    .yt-stat-num { display: block; font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--accent); }
+    .yt-stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+    /* ── STORE PREVIEW ── */
+    .store-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    .store-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .hero-action-row { flex-direction: column; align-items: flex-start; gap: 2.5rem; }
+      .hero-stats { border-left: none; padding-left: 0; border-top: 1px solid var(--border); padding-top: 2rem; width: 100%; justify-content: space-between; gap: 1rem; }
+      .services-grid { grid-template-columns: repeat(2, 1fr); }
+      .store-grid    { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .hero-stats    { flex-wrap: wrap; gap: 2rem; justify-content: flex-start; }
+      .services-grid { grid-template-columns: 1fr; }
+      .yt-section    { grid-template-columns: 1fr; gap: 2.5rem; }
+      .store-grid    { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .hero-ctas { flex-direction: column; width: 100%; }
+      .hero-ctas .btn { width: 100%; justify-content: center; }
+      .hero-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+      .yt-stats { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav id="main-nav">
+  <a href="index.html" class="logo">V<em> Royals</em> Studio</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="services.html">Services</a></li>
+    <li><a href="youtube.html">YouTube</a></li>
+    <li><a href="projects.html">Store</a></li>
+    <li><a href="about.html">About</a></li>
+    <li class="nav-logged-out"><a href="login.html">Login</a></li>
+    <li class="nav-logged-in"><a href="my-reels.html" style="color:var(--accent); font-weight:600">Your Items</a></li>
+    <li class="nav-logged-in nav-profile">
+      <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); padding:0.4rem 0.8rem; border-radius:30px; border:1px solid var(--border); margin-left:0.5rem">
+        <span class="user-avatar-placeholder">👤</span>
+        <span class="user-name-placeholder" style="font-size:0.8rem; font-weight:600">User</span>
+        <a href="/api/logout" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" title="Logout" style="display:flex; align-items:center; margin-left:0.4rem">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted); transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </a>
+      </div>
+    </li>
+    <li><a href="contact.html" class="btn btn-primary btn-sm">Hire Me</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger" aria-label="Menu" role="button" tabindex="0">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+<script>
+  (function() {
+    try {
+      const u = sessionStorage.getItem('vroyals_user');
+      if (u) {
+        const user = JSON.parse(u);
+        if (user.logged_in) {
+          const firstName = (user.full_name || 'User').split(' ')[0];
+          document.querySelectorAll('.user-name-placeholder').forEach(el => {
+            el.textContent = firstName;
+          });
+          document.querySelectorAll('.user-avatar-placeholder').forEach(el => {
+            if (user.avatar) {
+              el.innerHTML = `<img src="${user.avatar}" style="width:20px; height:20px; border-radius:50%; display:block">`;
+            }
+          });
+        }
+      }
+    } catch(e) {}
+  })();
+</script>
+
+
+<!-- ── MOBILE DRAWER ── -->
+<div class="mobile-drawer" id="mobile-drawer" aria-hidden="true">
+  <a href="index.html">Home</a>
+  <a href="services.html">Services</a>
+  <a href="youtube.html">YouTube</a>
+  <a href="projects.html">Store</a>
+  <a href="about.html">About</a>
+  <a href="login.html" class="nav-logged-out">Login</a>
+  <a href="my-reels.html" class="nav-logged-in" style="color:var(--accent); font-weight:600">Your Items</a>
+  <a href="/api/logout" class="nav-logged-in" onclick="event.preventDefault(); if (confirm('Are you sure you want to log out?')) { sessionStorage.removeItem('vroyals_user'); window.location.href='/api/logout'; }" style="color:var(--muted)">Logout 🚪</a>
+  <a href="contact.html" style="color: var(--accent);">Hire Me →</a>
+  <p class="mobile-drawer-footer">V Royals Studio © 2025</p>
+</div>
+
+<!-- ── HERO ── -->
+<section class="hero" id="home">
+  <div class="hero-inner reveal">
+    <div class="hero-eyebrow">
+      <span class="dot"></span>
+      <span>Available for new projects</span>
+    </div>
+    <h1>
+      Premium Web,<br>
+      <span class="line-accent">Project & Security</span><br>
+      Services 👑
+    </h1>
+    <p class="hero-desc">Building secure, high-performance digital products and scalable systems — through engineering excellence and technical precision.</p>
+    <div class="hero-action-row">
+      <div class="hero-ctas">
+        <a href="contact.html" class="btn btn-primary">Start a Project</a>
+        <a href="services.html" class="btn btn-ghost">Explore Services →</a>
+      </div>
+      <div class="hero-stats reveal">
+        <div class="stat-item">
+          <span class="stat-num" id="stat-projects" data-target="0">0</span>
+          <span class="stat-label">Projects</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num" id="stat-clients" data-target="0">0</span>
+          <span class="stat-label">Clients</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num" id="stat-rating" data-target="0.0">0</span>
+          <span class="stat-label">Rating</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num" id="stat-years" data-target="0">0</span>
+          <span class="stat-label">Years</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MARQUEE ── -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span>Cybersecurity</span><span>Web Development</span><span>Project Development</span>
+    <span>Website Testing</span><span>Vulnerability Auditing</span><span>Bug Fixing Reports</span>
+    <span>SaaS Platforms</span><span>Secure APIs</span><span>Database Scaling</span>
+    <span>Cybersecurity</span><span>Web Development</span><span>Project Development</span>
+    <span>Website Testing</span><span>Vulnerability Auditing</span><span>Bug Fixing Reports</span>
+    <span>SaaS Platforms</span><span>Secure APIs</span><span>Database Scaling</span>
+  </div>
+</div>
+
+<!-- ── SERVICES ── -->
+<section id="services">
+  <div class="section-label">What I Do</div>
+  <h2>Core Services</h2>
+  <p class="section-desc">Comprehensive engineering and security solutions to help scale your business.</p>
+  <div class="services-grid" style="margin-top: 3rem;">
+    <!-- CYBERSECURITY -->
+    <div class="v-card reveal">
+      <div class="service-card-img">
+        <img src="assets/images/service_cybersecurity.png" alt="Cybersecurity Services">
+      </div>
+      <h3 style="margin-top: 1.5rem;">Cybersecurity Services</h3>
+      <p style="margin-top: 0.75rem; font-size: 0.95rem;">Website testing, vulnerability testing, and bug fixing with perfect, detailed reports to secure your applications.</p>
+      <a href="services.html#video" class="btn btn-ghost btn-sm" style="margin-top: 1.5rem;">Explore Service &nbsp; →</a>
+    </div>
+
+    <!-- WEB -->
+    <div class="v-card reveal">
+      <div class="service-card-img">
+        <img src="assets/images/service_web.png" alt="Web Development Service">
+      </div>
+      <h3 style="margin-top: 1.5rem;">Web Development</h3>
+      <p style="margin-top: 0.75rem; font-size: 0.95rem;">Fast, scalable web apps and SaaS platforms. Landing pages, dashboards, e-commerce, full-stack builds.</p>
+      <a href="services.html#web" class="btn btn-ghost btn-sm" style="margin-top: 1.5rem;">Explore Service &nbsp; →</a>
+    </div>
+
+    <!-- PROJECT DEVELOPMENT -->
+    <div class="v-card reveal">
+      <div class="service-card-img">
+        <img src="assets/images/service_project_dev.png" alt="Project Development Service">
+      </div>
+      <h3 style="margin-top: 1.5rem;">Project Development</h3>
+      <p style="margin-top: 0.75rem; font-size: 0.95rem;">End-to-end custom application development, backend system scaling, requirements planning, and complete deployment pipelines.</p>
+      <a href="services.html#design" class="btn btn-ghost btn-sm" style="margin-top: 1.5rem;">Explore Service &nbsp; →</a>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- ── YOUTUBE ── -->
+<section id="youtube">
+  <div class="yt-section">
+    <div class="reveal">
+      <div class="section-label">Watch & Subscribe</div>
+      <h2>YouTube Hub</h2>
+      <p style="margin-top: 0.75rem; max-width: 440px;">Behind-the-scenes of building V Royals Studio — tutorials, project docs, and creator life. Subscribe and grow with us.</p>
+      <div class="yt-stats">
+        <div style="position: relative;">
+          <span class="live-indicator-dot"></span>
+          <span class="yt-stat-num" id="yt-subs-page">1.19K+</span>
+          <span class="yt-stat-lbl">Subscribers</span>
+        </div>
+        <div>
+          <span class="yt-stat-num" id="yt-views">396.1K</span>
+          <span class="yt-stat-label">Total Views</span>
+        </div>
+      </div>
+      <a href="https://www.youtube.com/channel/UCPUS-XlXHCF4PntvyV-WVKg" target="_blank" class="btn btn-primary">Visit Channel</a>
+    </div>
+    <div class="yt-embed reveal" style="--delay: 120ms">
+      <iframe src="https://www.youtube.com/embed/videoseries?list=UUPUS-XlXHCF4PntvyV-WVKg"
+        title="V Royals YouTube" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+    </div>
+  </div>
+</section>
+
+<!-- ── STORE PREVIEW ── -->
+<section id="store" style="background: var(--surface);">
+  <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <div class="section-label">Passive Income</div>
+      <h2 style="margin-bottom: 0;">Project Store</h2>
+    </div>
+    <a href="projects.html" class="btn btn-ghost btn-sm">Browse Store →</a>
+  </div>
+  <div class="store-grid" id="index-store-grid">
+    <!-- Dynamic products will be injected here by shared.js -->
+    <div class="v-card skeleton-card" style="height:200px"></div>
+    <div class="v-card skeleton-card" style="height:200px"></div>
+    <div class="v-card skeleton-card" style="height:200px"></div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="site-footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="index.html" class="logo">V<em> Royals</em> Studio</a>
+      <p>Premium digital services — web development, project development, and cybersecurity — built for secure and scalable systems.</p>
+    </div>
+    <div class="footer-links">
+      <h5>Pages</h5>
+      <ul>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="youtube.html">YouTube</a></li>
+        <li><a href="projects.html">Store</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-links">
+      <h5>Services</h5>
+      <ul>
+        <li><a href="services.html">Cybersecurity Services</a></li>
+        <li><a href="services.html">Web Development</a></li>
+        <li><a href="services.html">Project Development</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© <span id="footer-year">2025</span> V Royals Studio. All rights reserved.</p>
+    <div class="social-row">
+      <a href="#" class="social-btn" aria-label="YouTube">▶</a>
+      <a href="#" class="social-btn" aria-label="Instagram">📸</a>
+      <a href="#" class="social-btn" aria-label="Twitter">𝕏</a>
+      <a href="#" class="social-btn" aria-label="GitHub">⌥</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/shared.js"></script>
+</body>
+</html>
