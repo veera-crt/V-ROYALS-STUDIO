@@ -12,8 +12,7 @@ def init_db():
         with conn.cursor() as cur:
             # 1. CREATE TABLES
             
-            # Drop existing seeded tables to force reconstruction with correct UNIQUE constraints
-            cur.execute("DROP TABLE IF EXISTS reviews, user_reels, store_products, service_pricing, projects CASCADE;")
+            # Create tables only if they do not exist (Non-destructive migration)
             
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS users (
@@ -83,8 +82,7 @@ def init_db():
 
             # 2. SEED DATA (CLEAN MIGRATION FOR DEVELOPMENT & CYBERSECURITY)
             
-            # Truncate tables to remove old video-editing records
-            cur.execute("TRUNCATE TABLE service_pricing, store_products, reviews CASCADE;")
+            # Seed initial/default data safely without clearing existing records
 
             # Seed Pricing
             pricing_data = [
