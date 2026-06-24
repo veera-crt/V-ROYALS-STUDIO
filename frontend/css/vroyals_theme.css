@@ -781,22 +781,4 @@ html.user-logged-in .nav-logged-out {
 .rev-name { font-weight: 700; font-size: 1rem; color: var(--text); }
 .rev-role { color: var(--accent); font-size: 0.75rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; }
 
-/* ── Page Transitions (Premium UX slide from right-to-left) ── */
-body.page-animating {
-  overflow: hidden !important;
-  pointer-events: none !important;
-}
-.page-transition-active {
-  opacity: 0;
-  transform: translateX(30px);
-  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.page-transition-enter {
-  opacity: 1;
-  transform: translateX(0);
-}
-.page-transition-exit {
-  opacity: 0;
-  transform: translateX(-30px);
-}
 
