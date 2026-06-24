@@ -1,7 +1,57 @@
 // shared.js — Nav, mobile drawer, scroll reveal, footer year
 (function () {
+  // Apply page slide-in transition on load as early as possible
+  document.documentElement.style.scrollBehavior = 'auto'; // Prevent scroll jump on load transition
+  document.body.classList.add('page-transition-active');
+  document.body.classList.add('page-animating');
+  
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.body.classList.add('page-transition-enter');
+      setTimeout(() => {
+        document.body.classList.remove('page-animating');
+        document.documentElement.style.scrollBehavior = ''; // restore smooth scroll
+      }, 350);
+    });
+  });
+
+  // Intercept clicks on internal links to trigger exit transition
+  document.addEventListener('click', event => {
+    const anchor = event.target.closest('a');
+    if (!anchor) return;
+
+    const href = anchor.getAttribute('href');
+    if (!href) return;
+
+    // Check if it is an internal page link and not an anchor / external URL / API / target blank
+    const isInternal = href && 
+                       !href.startsWith('http') && 
+                       !href.startsWith('//') && 
+                       !href.startsWith('#') && 
+                       !href.startsWith('mailto:') && 
+                       !href.startsWith('tel:') && 
+                       !href.startsWith('javascript:') &&
+                       !href.startsWith('/api/') && 
+                       !anchor.getAttribute('target') &&
+                       !event.defaultPrevented &&
+                       event.button === 0 && 
+                       !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+
+    if (isInternal) {
+      event.preventDefault();
+      document.body.classList.add('page-animating');
+      document.body.classList.remove('page-transition-enter');
+      document.body.classList.add('page-transition-exit');
+      
+      setTimeout(() => {
+        window.location.href = href;
+      }, 320); // Sync with CSS transition duration
+    }
+  });
+
   // Disable right-click globally
   document.addEventListener('contextmenu', event => event.preventDefault());
+
 
   // Disable selecting and copying text globally (except in inputs & textareas)
   const isInputControl = target => target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA');
