@@ -114,9 +114,26 @@
 <script src="js/shared.js"></script>
 <script>
   let allProducts = [];
+  let purchasedTitles = [];
 
   async function loadStore() {
     try {
+      const cachedUser = sessionStorage.getItem('vroyals_user');
+      if (cachedUser) {
+        try {
+          const userObj = JSON.parse(cachedUser);
+          if (userObj.logged_in) {
+            const reelsResp = await fetch('/api/user/reels');
+            if (reelsResp.ok) {
+              const reels = await reelsResp.json();
+              purchasedTitles = reels.map(r => r.title.toLowerCase());
+            }
+          }
+        } catch(err) {
+          console.warn("Error loading purchased titles:", err);
+        }
+      }
+
       const response = await fetch('/api/store');
       allProducts = await response.json();
       renderProducts(allProducts);
@@ -124,6 +141,7 @@
       console.error("Store load failed:", e);
     }
   }
+
 
   function renderProducts(products) {
     const grid = document.getElementById('store-grid');
@@ -141,13 +159,17 @@
         return `<span class="tag-chip" style="font-size:0.7rem; padding:0.18rem 0.6rem">${t}</span>`;
       }).join('');
 
+      const isPurchased = purchasedTitles.includes(p.title.toLowerCase());
       const card = document.createElement('div');
       card.className = 'v-card store-card reveal visible'; // Make visible immediately for filter smoothness
       card.innerHTML = `
         <div class="card-thumb"><img src="${p.thumbnail}" alt="${p.title}" loading="lazy"/></div>
         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-          <span class="badge badge-gold" style="margin-bottom:0.75rem">${p.category.toUpperCase()}</span>
-          ${p.discount_percent > 0 ? `<span class="badge badge-green">${p.discount_percent}% OFF</span>` : ''}
+          <div style="display:flex; gap:0.4rem; align-items:center;">
+            <span class="badge badge-gold" style="margin-bottom:0.75rem">${p.category.toUpperCase()}</span>
+            ${isPurchased ? '<span class="badge" style="margin-bottom:0.75rem; background:#15803d; border-color:#22c55e; color:#fff">✓ Owned</span>' : ''}
+          </div>
+          ${p.discount_percent > 0 && !isPurchased ? `<span class="badge badge-green">${p.discount_percent}% OFF</span>` : ''}
         </div>
         <h4>${p.title}</h4>
         <div class="v-tech" style="margin-bottom:1.25rem; display:flex; gap:0.4rem; flex-wrap:wrap;">${techChips}</div>
@@ -156,9 +178,13 @@
             <span class="price-tag" style="font-size:1.1rem">₹${p.sale_price}</span>
             ${p.sale_price < p.original_price ? `<span style="text-decoration:line-through; font-size:0.75rem; color:var(--muted); margin-left:0.5rem">₹${p.original_price}</span>` : ''}
           </div>
-          <a href="project-details.html?id=${p.id}" class="btn btn-primary btn-sm">View Details</a>
+          ${isPurchased 
+            ? `<a href="project-details.html?id=${p.id}" class="btn btn-ghost btn-sm" style="border-color:#22c55e; color:#22c55e">✓ Owned (View)</a>` 
+            : `<a href="project-details.html?id=${p.id}" class="btn btn-primary btn-sm">View Details</a>`
+          }
         </div>
       `;
+
       grid.appendChild(card);
     });
   }

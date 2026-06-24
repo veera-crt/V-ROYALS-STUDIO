@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title id="page-title">Project Details — V Royals Studio</title>
   <link rel="icon" type="image/png" href="assets/images/favicon.png"/>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/vroyals_theme.css"/>
+
   <script>
     (function() {
       try {
@@ -175,7 +177,36 @@
 
 <script src="js/shared.js"></script>
 <script>
+  function convertToDirectDownload(url) {
+    if (!url) return url;
+    url = url.trim();
+    
+    // Google Drive File Link direct download converter
+    if (url.includes('drive.google.com')) {
+      const matchD = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if (matchD && matchD[1]) {
+        return `https://drive.google.com/uc?export=download&id=${matchD[1]}`;
+      }
+      const matchQuery = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (matchQuery && matchQuery[1]) {
+        return `https://drive.google.com/uc?export=download&id=${matchQuery[1]}`;
+      }
+    }
+    
+    // GitHub Repository direct zip download converter
+    if (url.includes('github.com')) {
+      let cleanUrl = url.replace(/\/$/, '').replace(/\.git$/, '');
+      const match = cleanUrl.match(/github\.com\/([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+)$/);
+      if (match) {
+        return `${cleanUrl}/archive/refs/heads/main.zip`;
+      }
+    }
+    
+    return url;
+  }
+
   async function loadDetails() {
+
     const params = new URLSearchParams(window.location.search);
     const productId = params.get('id');
     
@@ -213,9 +244,187 @@
         originalPriceEl.style.display = 'none';
       }
       
+      // Check if product is already purchased
+      let isPurchased = false;
+      let driveLink = '';
+      let guideLink = '';
+      
+      const cachedUser = sessionStorage.getItem('vroyals_user');
+      if (cachedUser) {
+        try {
+          const userObj = JSON.parse(cachedUser);
+          if (userObj.logged_in) {
+            const reelsResp = await fetch('/api/user/reels');
+            if (reelsResp.ok) {
+              const reels = await reelsResp.json();
+              const matchingReel = reels.find(r => r.title.toLowerCase() === p.title.toLowerCase());
+              if (matchingReel) {
+                isPurchased = true;
+                driveLink = matchingReel.drive_link;
+                guideLink = matchingReel.guide_link;
+              }
+            }
+          }
+        } catch(err) {
+          console.warn("Error checking purchased items:", err);
+        }
+      }
+      
       // Update Buttons
-      document.getElementById('buy-btn').href = `contact.html?product=${encodeURIComponent(p.title)}`;
+      const buyBtn = document.getElementById('buy-btn');
+      const askBtn = document.getElementById('ask-btn');
+      
+      if (isPurchased) {
+        // Change Buy Button to Download Button
+        buyBtn.textContent = "Download Project 📥";
+        buyBtn.href = convertToDirectDownload(driveLink);
+        buyBtn.target = "_blank";
+        buyBtn.style.background = "linear-gradient(135deg, #22c55e 0%, #15803d 100%)";
+        buyBtn.style.borderColor = "#22c55e";
+        buyBtn.style.color = "#fff";
+        buyBtn.style.opacity = "1";
+        buyBtn.disabled = false;
+        
+        // Show setup guide if guide_link exists
+        if (guideLink) {
+          askBtn.textContent = "View Setup Guide 📖";
+          askBtn.href = guideLink;
+          askBtn.target = "_blank";
+          askBtn.style.borderColor = "var(--accent2)";
+          askBtn.style.color = "var(--accent2)";
+        } else {
+          askBtn.href = `contact.html?product=${encodeURIComponent(p.title)}&ask=1`;
+        }
+        
+        // Add an Unlocked message to the buy box
+        const guaranteeEl = buyBtn.closest('.buy-box').querySelector('.guarantee');
+        if (guaranteeEl) {
+          guaranteeEl.innerHTML = "✅ Unlocked · Lifetime access granted";
+          guaranteeEl.style.color = "#22c55e";
+          guaranteeEl.style.fontWeight = "600";
+        }
+      } else {
+        // Remove any default click behavior and attach Razorpay checkout handler
+        buyBtn.addEventListener('click', async function(e) {
+
+        e.preventDefault();
+        
+        // Check authentication status
+        const cachedUser = sessionStorage.getItem('vroyals_user');
+        let isLoggedIn = false;
+        if (cachedUser) {
+          try {
+            isLoggedIn = JSON.parse(cachedUser).logged_in;
+          } catch(err) {}
+        }
+        
+        if (!isLoggedIn) {
+          // Double check status from backend
+          try {
+            const authResp = await fetch('/api/user/status');
+            const authData = await authResp.json();
+            if (authData.logged_in) {
+              isLoggedIn = true;
+              sessionStorage.setItem('vroyals_user', JSON.stringify(authData));
+            }
+          } catch(err) {}
+        }
+        
+        if (!isLoggedIn) {
+          alert("Please login to purchase and download this project.");
+          window.location.href = `login.html?redirect=project-details.html?id=${productId}`;
+          return;
+        }
+        
+        // Prevent multiple clicks
+        if (buyBtn.disabled) return;
+        buyBtn.disabled = true;
+        buyBtn.style.opacity = '0.7';
+        buyBtn.textContent = "Initiating Checkout... ⏳";
+        
+        try {
+          const orderResp = await fetch('/api/payment/create-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ product_id: parseInt(productId) })
+          });
+          
+          if (!orderResp.ok) {
+            const errData = await orderResp.json();
+            throw new Error(errData.error || "Failed to create payment order.");
+          }
+          
+          const orderData = await orderResp.json();
+          
+          const options = {
+            "key": orderData.key_id,
+            "amount": orderData.amount,
+            "currency": orderData.currency,
+            "name": "V Royals Studio",
+            "description": `Unlock ${orderData.product_title}`,
+            "order_id": orderData.order_id,
+            "handler": async function (response) {
+              buyBtn.textContent = "Verifying Transaction... 🔒";
+              try {
+                const verifyResp = await fetch('/api/payment/verify', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature,
+                    product_id: parseInt(productId)
+                  })
+                });
+                
+                const verifyData = await verifyResp.json();
+                if (verifyResp.ok && verifyData.success) {
+                  alert("🎉 Payment Successful! Access granted to " + orderData.product_title + ".");
+                  window.location.href = 'my-reels.html';
+                } else {
+                  alert(`❌ Payment verification failed: ${verifyData.error}`);
+                  buyBtn.disabled = false;
+                  buyBtn.style.opacity = '1';
+                  buyBtn.textContent = "Get Access Now 🔒";
+                }
+              } catch (verifyErr) {
+                alert("❌ Server connection lost during payment verification.");
+                buyBtn.disabled = false;
+                buyBtn.style.opacity = '1';
+                buyBtn.textContent = "Get Access Now 🔒";
+              }
+            },
+            "prefill": {
+              "name": orderData.user_name,
+              "email": orderData.user_email
+            },
+            "theme": {
+              "color": "#e2a93e"
+            },
+            "modal": {
+              "ondismiss": function() {
+                buyBtn.disabled = false;
+                buyBtn.style.opacity = '1';
+                buyBtn.textContent = "Get Access Now 🔒";
+              }
+            }
+          };
+          
+          const rzp = new Razorpay(options);
+          rzp.open();
+          
+        } catch(err) {
+          alert(`❌ ${err.message}`);
+          buyBtn.disabled = false;
+          buyBtn.style.opacity = '1';
+          buyBtn.textContent = "Get Access Now 🔒";
+        }
+      });
+      
       document.getElementById('ask-btn').href = `contact.html?product=${encodeURIComponent(p.title)}&ask=1`;
+      }
+
+
       
       // Render Tech Stack chips
       const techContainer = document.getElementById('product-tech-tags');

@@ -18,10 +18,23 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 # pyrefly: ignore [missing-import]
 from werkzeug.security import generate_password_hash, check_password_hash
 import requests
+import razorpay
 
 load_dotenv()
 
+# Initialize Razorpay Client
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
+
+razorpay_client = None
+if RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET:
+    try:
+        razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+    except Exception as e:
+        print(f"Error initializing Razorpay client: {e}")
+
 # Run database migrations for new columns (consolidated to minimize connection overhead on cold starts)
+
 try:
     migration_query = """
     ALTER TABLE store_products 
@@ -217,6 +230,9 @@ def terms():
 
 @app.route('/<path:page>')
 def serve_any_page(page):
+    # DevSecOps Hardening: Prevent directory traversal / path exploitation
+    if '..' in page or page.startswith('/') or page.startswith('.'):
+        abort(400)
     # If it ends with .html, serve as is
     if page.endswith('.html'):
         return render_template(page)
@@ -229,11 +245,38 @@ def serve_any_page(page):
     except:
         return render_template('index.html') # Fallback to home
 
+
 # ── INPUT VALIDATION HELPERS (DevSecOps) ──
 import re
 import html
+from itsdangerous import URLSafeSerializer
+
+def get_id_serializer():
+    return URLSafeSerializer(app.secret_key or 'default_id_serialization_key_12893')
+
+def encrypt_id(integer_id):
+    try:
+        return get_id_serializer().dumps(int(integer_id))
+    except Exception:
+        return None
+
+def decrypt_id(encrypted_id_str):
+    if not encrypted_id_str:
+        return None
+    try:
+        return int(get_id_serializer().loads(str(encrypted_id_str).strip()))
+    except Exception:
+        return None
+
+def is_safe_for_headers(val):
+
+    if not val or not isinstance(val, str):
+        return False
+    # No carriage returns or newlines allowed in headers (prevent header injection)
+    return '\r' not in val and '\n' not in val
 
 def is_valid_email(email_str):
+
     if not email_str or not isinstance(email_str, str):
         return False
     email_str = email_str.strip().lower()
@@ -373,8 +416,19 @@ def google_auth():
     google_client_id = os.getenv('GOOGLE_CLIENT_ID')
     redirect_uri = url_for('google_callback', _external=True)
     scope = "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"
+    
+    # Retrieve next/redirect URL parameter
+    next_url = request.args.get('next', '')
+    state_param = next_url if next_url else ''
+    
     auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?client_id={google_client_id}&redirect_uri={redirect_uri}&response_type=code&scope={scope}"
+    
+    if state_param:
+        import urllib.parse
+        auth_url += f"&state={urllib.parse.quote(state_param)}"
+        
     return redirect(auth_url)
+
 
 @app.route('/api/auth/google/callback')
 def google_callback():
@@ -450,10 +504,25 @@ def google_callback():
         user_obj = User(user_data['id'], user_data['email'], user_data['full_name'], user_data['avatar_url'], user_data['is_admin'])
         login_user(user_obj)
         
+        # Safe redirect to the requested page if state contains a next URL
+        state = request.args.get('state')
+        if state:
+            import urllib.parse
+            unquoted_state = urllib.parse.unquote(state).strip()
+            # Only redirect if it is a relative path (prevent open redirect vulnerabilities)
+            # Ensure it does not start with '//' and doesn't contain '://' to block absolute and protocol-relative URLs
+            if not unquoted_state.startswith('//') and '://' not in unquoted_state:
+                if unquoted_state.startswith('/') or unquoted_state.startswith('project-details.html') or unquoted_state.startswith('projects.html') or unquoted_state.startswith('contact.html'):
+                    # Handle cases where it doesn't start with a slash
+                    redirect_path = unquoted_state if unquoted_state.startswith('/') else '/' + unquoted_state
+                    return redirect(redirect_path)
+                
         return redirect(url_for('index'))
+
     except Exception as e:
         print(f"CRITICAL ERROR in google_callback: {e}")
         return redirect(url_for('login_page', error=f"System Error: {str(e)}"))
+
 
 @app.route('/api/stats/youtube')
 def get_youtube_stats():
@@ -555,7 +624,7 @@ def get_store_products():
             disc_percent = ((base - sale) / base) * 100
             
         products.append({
-            "id": row['id'],
+            "id": encrypt_id(row['id']),
             "title": row['title'],
             "description": row['description'],
             "original_price": base,
@@ -619,11 +688,15 @@ def user_status():
 def admin_page():
     return render_template('admin.html')
 
-@app.route('/api/store/<int:product_id>')
+@app.route('/api/store/<product_id>')
 def get_single_product(product_id):
     """Returns details of a single product."""
+    real_id = decrypt_id(product_id)
+    if real_id is None:
+        return jsonify({"error": "Invalid Product ID format"}), 400
+        
     from backend.database import execute_query
-    row = execute_query("SELECT * FROM store_products WHERE id = %s", (product_id,), fetch=True)
+    row = execute_query("SELECT * FROM store_products WHERE id = %s", (real_id,), fetch=True)
     if not row:
         return jsonify({"error": "Product not found"}), 404
     p = row[0]
@@ -647,7 +720,7 @@ def get_single_product(product_id):
         
         if not authorized:
             return jsonify({"error": "Access denied. This is a private product."}), 403
-
+ 
     base = float(p['price'])
     sale = float(p['sale_price']) if p['sale_price'] else base
     disc_percent = 0
@@ -655,7 +728,7 @@ def get_single_product(product_id):
         disc_percent = ((base - sale) / base) * 100
         
     return jsonify({
-        "id": p['id'],
+        "id": encrypt_id(p['id']),
         "title": p['title'],
         "description": p['description'],
         "original_price": base,
@@ -948,12 +1021,17 @@ def admin_store_add():
         app.logger.error(f"Error in admin_store_add: {e}")
         return jsonify({"error": "Failed to add store product."}), 500
 
-@app.route('/api/admin/store/update/<int:product_id>', methods=['POST'])
+@app.route('/api/admin/store/update/<product_id>', methods=['POST'])
 @login_required
 @admin_required
 def admin_store_update(product_id):
     """Modify a product in the store."""
+    real_id = decrypt_id(product_id)
+    if real_id is None:
+        return jsonify({"error": "Invalid Product ID format"}), 400
+        
     try:
+
         data = request.get_json()
         title = data.get('title')
         description = data.get('description')
@@ -996,7 +1074,7 @@ def admin_store_update(product_id):
         
         execute_query(
             "UPDATE store_products SET title = %s, description = %s, price = %s, sale_price = %s, thumbnail_url = %s, tech_stack = %s, category = %s, source_code_link = %s, is_public = %s, guide_link = %s WHERE id = %s",
-            (title_sanitized, description_sanitized, bp, sp, thumbnail_sanitized, tech_stack_sanitized, cat_val, source_code_sanitized, is_public_bool, guide_sanitized, product_id)
+            (title_sanitized, description_sanitized, bp, sp, thumbnail_sanitized, tech_stack_sanitized, cat_val, source_code_sanitized, is_public_bool, guide_sanitized, real_id)
         )
         # Clear cache
         db_cache.delete('store_products')
@@ -1006,13 +1084,17 @@ def admin_store_update(product_id):
         app.logger.error(f"Error in admin_store_update: {e}")
         return jsonify({"error": "Failed to update store product."}), 500
 
-@app.route('/api/admin/store/delete/<int:product_id>', methods=['POST'])
+@app.route('/api/admin/store/delete/<product_id>', methods=['POST'])
 @login_required
 @admin_required
 def admin_store_delete(product_id):
     """Delete a product from the store."""
+    real_id = decrypt_id(product_id)
+    if real_id is None:
+        return jsonify({"error": "Invalid Product ID format"}), 400
+        
     try:
-        execute_query("DELETE FROM store_products WHERE id = %s", (product_id,))
+        execute_query("DELETE FROM store_products WHERE id = %s", (real_id,))
         # Clear cache
         db_cache.delete('store_products')
         db_cache.delete('overall_stats')
@@ -1094,13 +1176,161 @@ def db_status():
         return jsonify({"status": "connected", "message": "Successfully connected to Neon DB"})
     return jsonify({"status": "error", "message": "Database connection failed"}), 500
 
-# ── START SERVER ──
+@app.route('/api/payment/create-order', methods=['POST'])
+@login_required
+@rate_limit(limit=10, period=60)
+def payment_create_order():
+    if not razorpay_client:
+        return jsonify({"error": "Razorpay is not configured on the server. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env"}), 500
+        
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Invalid request body"}), 400
+            
+        product_id_raw = data.get('product_id')
+        if product_id_raw is None:
+            return jsonify({"error": "Product ID is required"}), 400
+            
+        product_id = decrypt_id(product_id_raw)
+        if product_id is None:
+            return jsonify({"error": "Invalid Product ID format"}), 400
+            
+        # Fetch product from database
+        product_row = execute_query("SELECT * FROM store_products WHERE id = %s AND is_public = TRUE", (product_id,), fetch=True)
+        if not product_row:
+            return jsonify({"error": "Product not found"}), 404
+            
+        product = product_row[0]
+        sale_price = float(product['sale_price']) if product['sale_price'] else float(product['price'])
+        
+        # Razorpay expects amount in paise (e.g. 100 paise = 1 INR)
+        amount_paise = int(sale_price * 100)
+        
+        if amount_paise <= 0:
+            return jsonify({"error": "Invalid product price"}), 400
+            
+        # Create Razorpay Order
+        order_receipt = f"receipt_p{product_id}_u{current_user.id}_{int(time.time())}"
+        
+        order_data = {
+            'amount': amount_paise,
+            'currency': 'INR',
+            'receipt': order_receipt,
+            'notes': {
+                'product_id': str(product_id),
+                'user_id': str(current_user.id),
+                'product_title': product['title']
+            }
+        }
+        
+        razorpay_order = razorpay_client.order.create(data=order_data)
+        
+        return jsonify({
+            "key_id": RAZORPAY_KEY_ID,
+            "amount": razorpay_order['amount'],
+            "currency": razorpay_order['currency'],
+            "order_id": razorpay_order['id'],
+            "product_title": product['title'],
+            "user_name": current_user.full_name,
+            "user_email": current_user.email
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Error creating Razorpay order: {e}")
+        return jsonify({"error": "Failed to initiate payment. Please try again."}), 500
+
+@app.route('/api/payment/verify', methods=['POST'])
+@login_required
+@rate_limit(limit=10, period=60)
+def payment_verify():
+    if not razorpay_client:
+        return jsonify({"error": "Razorpay is not configured"}), 500
+        
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Invalid request body"}), 400
+            
+        razorpay_payment_id = data.get('razorpay_payment_id')
+        razorpay_order_id = data.get('razorpay_order_id')
+        razorpay_signature = data.get('razorpay_signature')
+        product_id_raw = data.get('product_id')
+        
+        if not all([razorpay_payment_id, razorpay_order_id, razorpay_signature, product_id_raw]):
+            return jsonify({"error": "Missing signature verification details"}), 400
+            
+        product_id = decrypt_id(product_id_raw)
+        if product_id is None:
+            return jsonify({"error": "Invalid Product ID format"}), 400
+
+            
+        # Verify the signature securely
+        params_dict = {
+            'razorpay_order_id': razorpay_order_id,
+            'razorpay_payment_id': razorpay_payment_id,
+            'razorpay_signature': razorpay_signature
+        }
+        
+        try:
+            razorpay_client.utility.verify_payment_signature(params_dict)
+        except razorpay.errors.SignatureVerificationError:
+            app.logger.warning(f"Razorpay Signature Verification Failed: order {razorpay_order_id}")
+            return jsonify({"error": "Payment signature verification failed. Tampering detected."}), 400
+            
+        # Prevent payment replays/double processing by checking if this transaction was already logged
+        existing_payment = execute_query(
+            "SELECT 1 FROM payments WHERE razorpay_payment_id = %s OR razorpay_order_id = %s",
+            (razorpay_payment_id, razorpay_order_id),
+            fetch=True
+        )
+        if existing_payment:
+            return jsonify({"error": "This transaction has already been processed."}), 400
+            
+        # Fetch the product from store_products
+        product_row = execute_query("SELECT * FROM store_products WHERE id = %s", (product_id,), fetch=True)
+        if not product_row:
+            return jsonify({"error": "Product not found"}), 404
+            
+        product = product_row[0]
+        
+        # Grant user access to the product
+        # First check if the user already has access to this product
+        existing_reel = execute_query(
+            "SELECT 1 FROM user_reels WHERE user_id = %s AND LOWER(title) = LOWER(%s)",
+            (current_user.id, product['title']),
+            fetch=True
+        )
+        if not existing_reel:
+            execute_query(
+                "INSERT INTO user_reels (user_id, title, drive_link, guide_link) VALUES (%s, %s, %s, %s)",
+                (current_user.id, product['title'], product['source_code_link'], product.get('guide_link'))
+            )
+            # Clear user reels cache
+            db_cache.delete(f"user_reels_{current_user.id}")
+            
+        # Log payment transaction
+        sale_price = float(product['sale_price']) if product['sale_price'] else float(product['price'])
+        execute_query(
+            "INSERT INTO payments (user_id, product_id, razorpay_order_id, razorpay_payment_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
+            (current_user.id, product_id, razorpay_order_id, razorpay_payment_id, sale_price, 'captured')
+        )
+        
+        return jsonify({"success": True, "message": "Payment verified and project access granted!"})
+        
+    except Exception as e:
+        app.logger.error(f"Error in payment verification: {e}")
+        return jsonify({"error": "An error occurred during payment verification. Please contact support."}), 500
+
 @app.route('/api/reviews/submit', methods=['POST'])
+
 @login_required
 @rate_limit(limit=5, period=60)
 def submit_review():
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({"error": "Invalid request body"}), 400
         item_name = data.get('item_name')
         rating = data.get('rating', 5)
         comment = data.get('comment')
@@ -1119,9 +1349,26 @@ def submit_review():
         if len(str(comment)) > 1000:
             return jsonify({"error": "Comment must be 1000 characters or less"}), 400
             
+        # ── Anti-spam link detector ──
+        if contains_links(str(comment)):
+            return jsonify({"error": "Links/URLs are not allowed in reviews."}), 400
+
+        # ── Access verification: Only allow reviews on assigned products ──
+        if not item_name or not str(item_name).strip():
+            return jsonify({"error": "Item name is required"}), 400
+            
+        item_name_str = str(item_name).strip()
+        access_check = execute_query(
+            "SELECT 1 FROM user_reels WHERE user_id = %s AND LOWER(title) = LOWER(%s)",
+            (current_user.id, item_name_str),
+            fetch=True
+        )
+        if not access_check:
+            return jsonify({"error": "You can only review projects assigned to your account."}), 403
+
         import html
         comment_sanitized = html.escape(str(comment).strip())
-        item_name_sanitized = html.escape(str(item_name).strip()) if item_name else None
+        item_name_sanitized = html.escape(item_name_str)
         
         execute_query(
             "INSERT INTO reviews (user_id, user_name, rating, comment, avatar_url, item_name) VALUES (%s, %s, %s, %s, %s, %s)",
@@ -1134,6 +1381,7 @@ def submit_review():
     except Exception as e:
         app.logger.error(f"Error submitting review: {e}")
         return jsonify({"error": "Failed to submit review."}), 500
+
 
 
 def generate_otp_signature(email, otp, expiration):
@@ -1154,10 +1402,13 @@ def send_contact_otp():
         # ── Input Validation ──
         if not email_addr or not name:
             return jsonify({"error": "Name and email are required"}), 400
+        if not is_safe_for_headers(name) or not is_safe_for_headers(email_addr):
+            return jsonify({"error": "Name and email cannot contain newline characters."}), 400
         if len(name) < 2 or len(name) > 100:
             return jsonify({"error": "Name must be between 2 and 100 characters"}), 400
         if not is_valid_email(email_addr) or len(email_addr) > 255:
             return jsonify({"error": "Please enter a valid email address"}), 400
+
             
         otp = str(random.randint(100000, 999999))
         expiration = int(time.time()) + 600 # 10 minutes expiry
@@ -1220,10 +1471,13 @@ def api_contact():
         # ── Input Validation ──
         if not all([name, email_addr, msg, otp, signature, expiration]):
             return jsonify({"error": "Missing required fields or OTP"}), 400
+        if not is_safe_for_headers(name) or not is_safe_for_headers(email_addr) or not is_safe_for_headers(service) or not is_safe_for_headers(budget):
+            return jsonify({"error": "Fields cannot contain newline characters."}), 400
         if len(name) < 2 or len(name) > 100:
             return jsonify({"error": "Name must be between 2 and 100 characters"}), 400
         if not is_valid_email(email_addr) or len(email_addr) > 255:
             return jsonify({"error": "Invalid email address"}), 400
+
         if len(msg) < 10:
             return jsonify({"error": "Message must be at least 10 characters"}), 400
         if len(msg) > 2000:
