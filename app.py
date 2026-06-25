@@ -1167,6 +1167,270 @@ def admin_access_revoke(access_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+def send_invoice_email_in_background(user_email, name, product_title, amount, payment_id, order_id, base_url):
+    """Sends a premium HTML and plain text invoice to the user after a successful purchase."""
+    import smtplib
+    import os
+    from email.message import EmailMessage
+    from datetime import datetime
+    
+    smtp_email = os.getenv('SMTP_EMAIL')
+    smtp_password = os.getenv('SMTP_PASSWORD')
+    if smtp_password:
+        smtp_password = smtp_password.replace(" ", "")
+        
+    if not smtp_email or not smtp_password:
+        app.logger.warning("[INVOICE SMTP] SMTP credentials not set, skipping invoice email.")
+        return
+        
+    try:
+        current_date = datetime.now().strftime("%B %d, %Y")
+        current_year = datetime.now().strftime("%Y")
+        my_items_url = f"{base_url}my-reels.html"
+        
+        # Plain text version
+        body_text = f"""Hello {name},
+
+Thank you for your purchase at V Royals Studio!
+Your payment has been successfully processed and your project has been unlocked.
+
+--- INVOICE DETAILS ---
+Date: {current_date}
+Product: {product_title}
+Amount: INR {amount:.2f}
+Payment ID: {payment_id}
+Order ID: {order_id}
+Status: SUCCESS
+
+You can access and download your purchased items here: {my_items_url}
+
+If you have any questions or require support, please reply directly to this email ({smtp_email}).
+
+Best regards,
+V Royals Studio
+"""
+
+        # HTML version
+        body_html = f"""<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {{
+      background-color: #050508;
+      color: #f0f0f3;
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 40px 20px;
+    }}
+    .invoice-card {{
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #0d0d14;
+      border: 1px solid rgba(245, 197, 24, 0.25);
+      border-radius: 18px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }}
+    .header {{
+      text-align: center;
+      margin-bottom: 40px;
+    }}
+    .logo {{
+      font-size: 24px;
+      font-weight: bold;
+      color: #f0f0f3;
+      text-decoration: none;
+    }}
+    .logo em {{
+      font-style: normal;
+      color: #f5c518;
+    }}
+    .title {{
+      font-size: 20px;
+      margin-top: 10px;
+      color: #8a8a9a;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }}
+    .divider {{
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+      margin: 30px 0;
+    }}
+    .details-grid {{
+      display: table;
+      width: 100%;
+      margin-bottom: 30px;
+    }}
+    .details-row {{
+      display: table-row;
+    }}
+    .details-cell {{
+      display: table-cell;
+      padding: 6px 0;
+      font-size: 14px;
+      color: #8a8a9a;
+    }}
+    .details-cell.right {{
+      text-align: right;
+      color: #f0f0f3;
+      font-weight: 600;
+    }}
+    .item-table {{
+      width: 100%;
+      border-collapse: collapse;
+      margin: 30px 0;
+    }}
+    .item-table th {{
+      text-align: left;
+      padding: 12px;
+      color: #8a8a9a;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }}
+    .item-table td {{
+      padding: 20px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }}
+    .item-name {{
+      font-size: 16px;
+      font-weight: bold;
+      color: #f0f0f3;
+    }}
+    .item-price {{
+      text-align: right;
+      font-size: 16px;
+      font-weight: bold;
+      color: #f5c518;
+    }}
+    .total-section {{
+      text-align: right;
+      margin-top: 20px;
+    }}
+    .total-label {{
+      font-size: 14px;
+      color: #8a8a9a;
+    }}
+    .total-amount {{
+      font-size: 28px;
+      font-weight: bold;
+      color: #f5c518;
+      margin-top: 5px;
+    }}
+    .button-container {{
+      text-align: center;
+      margin: 40px 0 20px;
+    }}
+    .btn {{
+      display: inline-block;
+      background: linear-gradient(135deg, #f5c518 0%, #d4aa0d 100%);
+      color: #050508 !important;
+      font-weight: bold;
+      text-decoration: none;
+      padding: 14px 30px;
+      border-radius: 8px;
+      font-size: 16px;
+    }}
+    .footer {{
+      text-align: center;
+      font-size: 12px;
+      color: #5a5a6a;
+      margin-top: 40px;
+      line-height: 1.5;
+    }}
+  </style>
+</head>
+<body>
+  <div class="invoice-card">
+    <div class="header">
+      <div class="logo">V<em> Royals</em> Studio</div>
+      <div class="title">Payment Invoice</div>
+    </div>
+    
+    <p>Hi {name},</p>
+    <p>Thank you for your purchase! Your payment has been successfully processed and your project has been unlocked. Here is your official invoice.</p>
+    
+    <div class="divider"></div>
+    
+    <div class="details-grid">
+      <div class="details-row">
+        <div class="details-cell">Date:</div>
+        <div class="details-cell right">{current_date}</div>
+      </div>
+      <div class="details-row">
+        <div class="details-cell">Payment ID:</div>
+        <div class="details-cell right">{payment_id}</div>
+      </div>
+      <div class="details-row">
+        <div class="details-cell">Order ID:</div>
+        <div class="details-cell right">{order_id}</div>
+      </div>
+      <div class="details-row">
+        <div class="details-cell">Status:</div>
+        <div class="details-cell right" style="color:#22c55e;">SUCCESS</div>
+      </div>
+    </div>
+    
+    <table class="item-table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th style="text-align: right;">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="item-name">{product_title}</div>
+            <div style="font-size: 12px; color: #8a8a9a; margin-top: 4px;">Digital product - Source Code & Lifetime Updates</div>
+          </td>
+          <td class="item-price">₹{amount:.2f}</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div class="total-section">
+      <span class="total-label">Total Paid</span>
+      <div class="total-amount">₹{amount:.2f}</div>
+    </div>
+    
+    <div class="button-container">
+      <a href="{my_items_url}" class="btn">Access Your Items</a>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <div class="footer">
+      This is an automated receipt. If you have any questions or require support, please contact us at <a href="mailto:{smtp_email}" style="color: #f5c518; text-decoration: none;">{smtp_email}</a>.<br>
+      © {current_year} V Royals Studio. All rights reserved.
+    </div>
+  </div>
+</body>
+</html>
+"""
+
+        em = EmailMessage()
+        em['Subject'] = f"Invoice for your purchase of {product_title} — V Royals Studio"
+        em['From'] = smtp_email
+        em['To'] = user_email
+        em.set_content(body_text)
+        em.add_alternative(body_html, subtype='html')
+        
+        smtp_server = "smtp.gmail.com"
+        smtp_port = 587
+        
+        with smtplib.SMTP(smtp_server, smtp_port, timeout=15) as server:
+            server.starttls()
+            server.login(smtp_email, smtp_password)
+            server.send_message(em)
+            
+        app.logger.info(f"[INVOICE SMTP] Automatically sent purchase invoice for {product_title} to {user_email}")
+    except Exception as e:
+        app.logger.error(f"[INVOICE SMTP ERROR] Failed to send invoice email to {user_email}: {e}")
+
 @app.route('/api/db-status')
 def db_status():
     """Checks the PostgreSQL connection status."""
@@ -1315,6 +1579,17 @@ def payment_verify():
             "INSERT INTO payments (user_id, product_id, razorpay_order_id, razorpay_payment_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
             (current_user.id, product_id, razorpay_order_id, razorpay_payment_id, sale_price, 'captured')
         )
+        
+        # Send automatic invoice email in a background thread
+        import threading
+        user_email = getattr(current_user, 'email', '')
+        user_name = getattr(current_user, 'full_name', 'Client')
+        if user_email:
+            threading.Thread(
+                target=send_invoice_email_in_background,
+                args=(user_email, user_name, product['title'], sale_price, razorpay_payment_id, razorpay_order_id, request.url_root),
+                daemon=True
+            ).start()
         
         return jsonify({"success": True, "message": "Payment verified and project access granted!"})
         
