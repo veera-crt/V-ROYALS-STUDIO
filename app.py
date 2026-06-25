@@ -125,12 +125,12 @@ def set_security_headers(response):
     # Strict Content Security Policy (CSP) (DevSecOps)
     csp_directives = [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' https://www.youtube.com https://s.ytimg.com https://www.gstatic.com",
+        "script-src 'self' 'unsafe-inline' https://www.youtube.com https://s.ytimg.com https://www.gstatic.com https://checkout.razorpay.com",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
-        "img-src 'self' data: https://lh3.googleusercontent.com https://yt3.googleusercontent.com https://yt3.ggpht.com https://i.ytimg.com https://images.unsplash.com https://www.gstatic.com",
-        "frame-src 'self' https://www.youtube.com https://accounts.google.com",
-        "connect-src 'self' https://www.googleapis.com"
+        "img-src 'self' data: https://lh3.googleusercontent.com https://yt3.googleusercontent.com https://yt3.ggpht.com https://i.ytimg.com https://images.unsplash.com https://www.gstatic.com https://*.razorpay.com",
+        "frame-src 'self' https://www.youtube.com https://accounts.google.com https://api.razorpay.com",
+        "connect-src 'self' https://www.googleapis.com https://api.razorpay.com"
     ]
     response.headers['Content-Security-Policy'] = "; ".join(csp_directives)
     
