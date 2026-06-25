@@ -139,10 +139,28 @@
 
       <aside class="buy-box reveal">
         <span class="badge badge-gold" style="margin-bottom:1rem">Vault Access</span>
-        <div class="price-display" style="margin-bottom: 1.5rem;">
+        <div class="price-display" style="margin-bottom: 1rem;">
           <span class="buy-price" id="product-price">₹0</span>
           <span id="product-original-price" style="text-decoration:line-through; font-size:0.9rem; color:var(--muted); display:none">₹0</span>
         </div>
+        
+        <!-- Price details breakdown (12% tax) -->
+        <div id="price-breakdown" style="font-size: 0.85rem; color: var(--muted); margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; background: var(--surface2); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
+          <div style="display: flex; justify-content: space-between;">
+            <span>Base Price:</span>
+            <span id="breakdown-base">₹0</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>Tax (12%):</span>
+            <span id="breakdown-tax">₹0</span>
+          </div>
+          <div style="height: 1px; background: var(--border); margin: 0.2rem 0;"></div>
+          <div style="display: flex; justify-content: space-between; font-weight: bold; color: var(--text);">
+            <span>Total Price:</span>
+            <span id="breakdown-total">₹0</span>
+          </div>
+        </div>
+        
         <a id="buy-btn" href="#" class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:0.75rem">Get Access Now 🔒</a>
         <a id="ask-btn" href="#" class="btn btn-ghost" style="width:100%;justify-content:center">Ask a Question</a>
         <p class="guarantee">Instant delivery · 100% secure · Support included</p>
@@ -234,15 +252,28 @@
       thumbnailEl.src = p.thumbnail || 'https://images.unsplash.com/photo-1551288049-bbbda5366fd9?auto=format&fit=crop&q=80&w=1200';
       thumbnailEl.alt = p.title;
       
-      // Update Price display
-      document.getElementById('product-price').textContent = `₹${p.sale_price}`;
+      // Update Price display (Showing total price including tax)
+      const basePrice = parseFloat(p.sale_price) || 0;
+      const tax = basePrice * 0.12;
+      const totalPrice = basePrice + tax;
+      
+      const originalBase = parseFloat(p.original_price) || 0;
+      const originalTotal = originalBase * 1.12;
+      
+      document.getElementById('product-price').textContent = `₹${totalPrice.toFixed(0)}`;
+      
       const originalPriceEl = document.getElementById('product-original-price');
-      if (p.sale_price < p.original_price) {
-        originalPriceEl.textContent = `₹${p.original_price}`;
+      if (basePrice < originalBase) {
+        originalPriceEl.textContent = `₹${originalTotal.toFixed(0)}`;
         originalPriceEl.style.display = 'inline-block';
       } else {
         originalPriceEl.style.display = 'none';
       }
+      
+      // Update Breakdown details
+      document.getElementById('breakdown-base').textContent = `₹${basePrice.toFixed(2)}`;
+      document.getElementById('breakdown-tax').textContent = `₹${tax.toFixed(2)}`;
+      document.getElementById('breakdown-total').textContent = `₹${totalPrice.toFixed(2)}`;
       
       // Check if product is already purchased
       let isPurchased = false;

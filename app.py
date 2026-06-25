@@ -1188,6 +1188,9 @@ def send_invoice_email_in_background(user_email, name, product_title, amount, pa
         current_year = datetime.now().strftime("%Y")
         my_items_url = f"{base_url}my-reels.html"
         
+        tax = amount * 0.12
+        total_amount = amount + tax
+        
         # Plain text version
         body_text = f"""Hello {name},
 
@@ -1197,7 +1200,9 @@ Your payment has been successfully processed and your project has been unlocked.
 --- INVOICE DETAILS ---
 Date: {current_date}
 Product: {product_title}
-Amount: INR {amount:.2f}
+Base Price: INR {amount:.2f}
+Tax (12%): INR {tax:.2f}
+Total Paid: INR {total_amount:.2f}
 Payment ID: {payment_id}
 Order ID: {order_id}
 Status: SUCCESS
@@ -1389,12 +1394,18 @@ V Royals Studio
           </td>
           <td class="item-price">₹{amount:.2f}</td>
         </tr>
+        <tr>
+          <td>
+            <div style="font-size: 14px; color: #8a8a9a; margin-top: 4px;">Tax (12%)</div>
+          </td>
+          <td class="item-price" style="color: #8a8a9a; font-weight: normal; padding-top: 8px;">₹{tax:.2f}</td>
+        </tr>
       </tbody>
     </table>
     
     <div class="total-section">
       <span class="total-label">Total Paid</span>
-      <div class="total-amount">₹{amount:.2f}</div>
+      <div class="total-amount">₹{total_amount:.2f}</div>
     </div>
     
     <div class="button-container">
@@ -1466,10 +1477,14 @@ def payment_create_order():
             return jsonify({"error": "Product not found"}), 404
             
         product = product_row[0]
-        sale_price = float(product['sale_price']) if product['sale_price'] else float(product['price'])
+        base_price = float(product['sale_price']) if product['sale_price'] else float(product['price'])
+        
+        # Calculate 12% tax (for every 100 rupees tax is 12 rupees)
+        tax = base_price * 0.12
+        total_price = base_price + tax
         
         # Razorpay expects amount in paise (e.g. 100 paise = 1 INR)
-        amount_paise = int(sale_price * 100)
+        amount_paise = int(total_price * 100)
         
         if amount_paise <= 0:
             return jsonify({"error": "Invalid product price"}), 400
@@ -1574,10 +1589,12 @@ def payment_verify():
             db_cache.delete(f"user_reels_{current_user.id}")
             
         # Log payment transaction
-        sale_price = float(product['sale_price']) if product['sale_price'] else float(product['price'])
+        base_price = float(product['sale_price']) if product['sale_price'] else float(product['price'])
+        tax = base_price * 0.12
+        total_price = base_price + tax
         execute_query(
             "INSERT INTO payments (user_id, product_id, razorpay_order_id, razorpay_payment_id, amount, status) VALUES (%s, %s, %s, %s, %s, %s)",
-            (current_user.id, product_id, razorpay_order_id, razorpay_payment_id, sale_price, 'captured')
+            (current_user.id, product_id, razorpay_order_id, razorpay_payment_id, total_price, 'captured')
         )
         
         # Send automatic invoice email in a background thread
@@ -1587,7 +1604,7 @@ def payment_verify():
         if user_email:
             threading.Thread(
                 target=send_invoice_email_in_background,
-                args=(user_email, user_name, product['title'], sale_price, razorpay_payment_id, razorpay_order_id, request.url_root),
+                args=(user_email, user_name, product['title'], base_price, razorpay_payment_id, razorpay_order_id, request.url_root),
                 daemon=True
             ).start()
         
