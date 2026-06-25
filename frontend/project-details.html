@@ -223,6 +223,13 @@
     return url;
   }
 
+  function htmlUnescape(str) {
+    if (!str) return '';
+    const txt = document.createElement('textarea');
+    txt.innerHTML = str;
+    return txt.value;
+  }
+
   async function loadDetails() {
 
     const params = new URLSearchParams(window.location.search);
@@ -288,7 +295,7 @@
             const reelsResp = await fetch('/api/user/reels');
             if (reelsResp.ok) {
               const reels = await reelsResp.json();
-              const matchingReel = reels.find(r => r.title.toLowerCase() === p.title.toLowerCase());
+              const matchingReel = reels.find(r => htmlUnescape(r.title).toLowerCase() === htmlUnescape(p.title).toLowerCase());
               if (matchingReel) {
                 isPurchased = true;
                 driveLink = matchingReel.drive_link;

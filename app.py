@@ -710,9 +710,11 @@ def get_single_product(product_id):
                 authorized = True
             else:
                 # Check if this user has access to this product (match by product title in user_reels)
+                import html
+                title_escaped = html.escape(p['title'])
                 access_row = execute_query(
-                    "SELECT 1 FROM user_reels WHERE user_id = %s AND LOWER(title) = LOWER(%s)",
-                    (current_user.id, p['title']),
+                    "SELECT 1 FROM user_reels WHERE user_id = %s AND (LOWER(title) = LOWER(%s) OR LOWER(title) = LOWER(%s))",
+                    (current_user.id, p['title'], title_escaped),
                     fetch=True
                 )
                 if access_row:
@@ -1575,9 +1577,11 @@ def payment_verify():
         
         # Grant user access to the product
         # First check if the user already has access to this product
+        import html
+        title_escaped = html.escape(product['title'])
         existing_reel = execute_query(
-            "SELECT 1 FROM user_reels WHERE user_id = %s AND LOWER(title) = LOWER(%s)",
-            (current_user.id, product['title']),
+            "SELECT 1 FROM user_reels WHERE user_id = %s AND (LOWER(title) = LOWER(%s) OR LOWER(title) = LOWER(%s))",
+            (current_user.id, product['title'], title_escaped),
             fetch=True
         )
         if not existing_reel:
@@ -1650,9 +1654,12 @@ def submit_review():
             return jsonify({"error": "Item name is required"}), 400
             
         item_name_str = str(item_name).strip()
+        import html
+        item_name_escaped = html.escape(item_name_str)
+        
         access_check = execute_query(
-            "SELECT 1 FROM user_reels WHERE user_id = %s AND LOWER(title) = LOWER(%s)",
-            (current_user.id, item_name_str),
+            "SELECT 1 FROM user_reels WHERE user_id = %s AND (LOWER(title) = LOWER(%s) OR LOWER(title) = LOWER(%s))",
+            (current_user.id, item_name_str, item_name_escaped),
             fetch=True
         )
         if not access_check:

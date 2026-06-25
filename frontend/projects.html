@@ -113,6 +113,13 @@
 </footer>
 <script src="js/shared.js"></script>
 <script>
+  function htmlUnescape(str) {
+    if (!str) return '';
+    const txt = document.createElement('textarea');
+    txt.innerHTML = str;
+    return txt.value;
+  }
+
   let allProducts = [];
   let purchasedTitles = [];
 
@@ -126,7 +133,7 @@
             const reelsResp = await fetch('/api/user/reels');
             if (reelsResp.ok) {
               const reels = await reelsResp.json();
-              purchasedTitles = reels.map(r => r.title.toLowerCase());
+              purchasedTitles = reels.map(r => htmlUnescape(r.title).toLowerCase());
             }
           }
         } catch(err) {
@@ -159,7 +166,7 @@
         return `<span class="tag-chip" style="font-size:0.7rem; padding:0.18rem 0.6rem">${t}</span>`;
       }).join('');
 
-      const isPurchased = purchasedTitles.includes(p.title.toLowerCase());
+      const isPurchased = purchasedTitles.includes(htmlUnescape(p.title).toLowerCase());
       const card = document.createElement('div');
       card.className = 'v-card store-card reveal visible'; // Make visible immediately for filter smoothness
       card.innerHTML = `
