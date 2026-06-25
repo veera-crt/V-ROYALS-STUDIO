@@ -346,7 +346,7 @@
           const orderResp = await fetch('/api/payment/create-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ product_id: parseInt(productId) })
+            body: JSON.stringify({ product_id: productId })
           });
           
           if (!orderResp.ok) {
@@ -373,7 +373,7 @@
                     razorpay_payment_id: response.razorpay_payment_id,
                     razorpay_order_id: response.razorpay_order_id,
                     razorpay_signature: response.razorpay_signature,
-                    product_id: parseInt(productId)
+                    product_id: productId
                   })
                 });
                 
