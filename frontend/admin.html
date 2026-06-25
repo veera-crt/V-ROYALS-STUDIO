@@ -846,8 +846,8 @@
           <td style="font-size:0.8rem; color:var(--muted)">${p.tech_stack || '-'}</td>
           <td>
             <div class="action-btn-group">
-              <button class="btn btn-ghost btn-sm" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-color:var(--accent)" onclick="editStoreProduct(${p.id})">Edit</button>
-              <button class="btn btn-ghost btn-sm" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-color:var(--accent2)" onclick="deleteStoreProduct(${p.id})">Delete</button>
+              <button class="btn btn-ghost btn-sm" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-color:var(--accent)" onclick="editStoreProduct('${p.id}')">Edit</button>
+              <button class="btn btn-ghost btn-sm" style="padding:0.3rem 0.6rem; font-size:0.75rem; border-color:var(--accent2)" onclick="deleteStoreProduct('${p.id}')">Delete</button>
             </div>
           </td>
         `;
